@@ -21,27 +21,31 @@ broches et une ligne K pour le diagnostic.
 
 ## Installation et lancement
 
-1. Télécharger `MS41Simulator-1.0.0.zip` et le décompresser où l'on veut.
-2. Double-clic sur `MS41Simulator.jar`
+1. Télécharger ce dépôt : bouton vert **Code** en haut de la page, puis **Download ZIP**.
+2. Décompresser le ZIP où l'on veut (il contient un dossier `MS41-Simulator-M52--main`).
+3. Dans ce dossier, double-clic sur `MS41Simulator.jar`
    (ou dans un terminal, depuis le dossier : `java -jar MS41Simulator.jar`).
+
+Garder les fichiers ensemble : le simulateur cherche `lib/` et `docs/` à côté de `MS41Simulator.jar`.
 
 ## Premiers pas
 
 1. *Fichier > Charger full read…* : choisir son full read (lecture brute de la puce ou vue CPU, détectée seule).
-2. Facultatif : placer sa définition RomRaider dans `docs/definitions/` (chargée automatiquement au chargement du
-   full read), ou *Fichier > Charger une définition RomRaider*.
+2. Facultatif : créer le dossier `docs/definitions/` à côté du jar et y placer sa définition RomRaider (chargée
+   automatiquement au chargement du full read), ou *Fichier > Charger une définition RomRaider*.
 3. Onglet *Moteur virtuel* : choisir le moteur et les injecteurs, puis **Démarrer**.
 4. *Aide > Guide utilisateur* (F1) : le guide illustré complet s'ouvre dans le navigateur.
 
-## Contenu du ZIP
+## Contenu du dépôt
 
 | Élément | Rôle |
 |---|---|
 | `MS41Simulator.jar` | le simulateur (avec MS41 ECU Tool v1.1.5) |
 | `docs/Guide_utilisateur/` | guide utilisateur (Aide > Guide) |
-| `docs/definitions/` | dossier des définitions RomRaider (vide : y mettre la sienne) |
-| `data/eeprom/` | EEPROM simulées enregistrées |
 | `lib/` | bibliothèques pour les manettes (JNA, SDL2) et leurs licences |
+
+Créés à l'usage à côté du jar : `docs/definitions/` (à créer soi-même, pour sa définition RomRaider),
+`data/eeprom/` (EEPROM simulées enregistrées, créé automatiquement) et `ms41_ecu_tool.log` (journal de MS41 ECU Tool).
 
 ## Remarques
 
