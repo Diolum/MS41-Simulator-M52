@@ -1,0 +1,7 @@
+Bibliotheques tierces fournies dans lib/ (pour les manettes) :
+
+- jna.jar : Java Native Access 5.17.0 - licence Apache 2.0 ou LGPL 2.1 (au choix).
+  https://github.com/java-native-access/jna
+- natives/macos/libSDL2.dylib et natives/windows-x64/SDL2.dll : SDL 2.30.9 - licence zlib.
+  https://github.com/libsdl-org/SDL
+- Linux : SDL2 du systeme (paquet libsdl2), sinon lecture directe de /dev/input/jsN.

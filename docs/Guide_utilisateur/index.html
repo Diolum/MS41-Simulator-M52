@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS41 Simulator – Guide utilisateur</title>
+<style>
+  :root {
+    --fond: #f6f7f9; --page: #ffffff; --texte: #1d2330; --doux: #5b6475; --trait: #dfe3ea;
+    --accent: #0b5cad; --rouge: #d62728; --code: #eef1f5; --note: #fff8e1; --note-trait: #f0c24b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fond: #101216; --page: #1b1f25; --texte: #e8eaed; --doux: #8c929b; --trait: #2a2f36;
+            --accent: #409cff; --code: #242a33; --note: #2b2615; --note-trait: #8a6d1d; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fond); color: var(--texte);
+         font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  .cadre { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1500px; margin: 0 auto; }
+  nav { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; padding: 24px 18px;
+        border-right: 1px solid var(--trait); font-size: 14px; }
+  nav .titre { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  nav .version { color: var(--doux); font-size: 12px; margin-bottom: 16px; }
+  nav a { display: block; color: var(--texte); text-decoration: none; padding: 3px 8px; border-radius: 6px; }
+  nav a:hover { background: var(--code); }
+  nav .sous { padding-left: 20px; color: var(--doux); }
+  main { background: var(--page); padding: 32px 48px 80px; min-width: 0; }
+  h1 { font-size: 30px; margin: 0 0 6px; }
+  h2 { font-size: 23px; margin: 56px 0 12px; padding-top: 12px; border-top: 1px solid var(--trait); }
+  h3 { font-size: 18px; margin: 32px 0 8px; }
+  p, li { max-width: 78ch; }
+  a { color: var(--accent); }
+  code, kbd { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 0.88em;
+              background: var(--code); padding: 1px 5px; border-radius: 4px; }
+  kbd { border: 1px solid var(--trait); border-bottom-width: 2px; }
+  .chapo { color: var(--doux); font-size: 17px; max-width: 78ch; }
+  figure { margin: 18px 0 8px; }
+  figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--trait); border-radius: 6px;
+               box-shadow: 0 2px 10px rgba(0,0,0,.08); cursor: zoom-in; }
+  figcaption { color: var(--doux); font-size: 14px; margin-top: 6px; }
+  ol.reperes { list-style: none; padding: 0; counter-reset: rep; max-width: 90ch; }
+  ol.reperes > li { counter-increment: rep; position: relative; padding: 4px 0 6px 40px; max-width: none; }
+  ol.reperes > li::before { content: counter(rep); position: absolute; left: 0; top: 4px; width: 26px; height: 26px;
+               border-radius: 50%; background: var(--rouge); color: #fff; font-weight: 700; font-size: 14px;
+               display: flex; align-items: center; justify-content: center; border: 2px solid #fff;
+               box-shadow: 0 0 0 1px var(--rouge); }
+  table { border-collapse: collapse; margin: 12px 0; font-size: 15px; display: block; max-width: 100%; overflow-x: auto; }
+  th, td { border: 1px solid var(--trait); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code); }
+  .note { background: var(--note); border-left: 4px solid var(--note-trait); padding: 10px 14px; border-radius: 4px;
+          max-width: 78ch; margin: 14px 0; }
+  .etapes { counter-reset: et; list-style: none; padding: 0; }
+  .etapes > li { counter-increment: et; position: relative; padding-left: 44px; margin-bottom: 12px; }
+  .etapes > li::before { content: counter(et); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 8px;
+               background: var(--accent); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .deux { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start; }
+  #zoom { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; align-items: center; justify-content: center;
+          cursor: zoom-out; z-index: 10; padding: 20px; }
+  #zoom img { max-width: 100%; max-height: 100%; }
+  @media (max-width: 900px) {
+    .cadre { grid-template-columns: minmax(0, 1fr); }
+    .deux { grid-template-columns: minmax(0, 1fr); }
+    nav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--trait); }
+    main { padding: 20px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="cadre">
+<nav>
+  <div class="titre">MS41 Simulator</div>
+  <div class="version">Guide utilisateur – version 1.0.0</div>
+  <a href="#presentation">Présentation</a>
+  <a href="#rapide">Démarrage rapide</a>
+  <a href="#fenetre">La fenêtre principale</a>
+  <a class="sous" href="#theme">Apparence</a>
+  <a href="#execution">Exécuter le firmware</a>
+  <a class="sous" href="#desassemblage">Désassemblage</a>
+  <a class="sous" href="#registres">Registres CPU</a>
+  <a class="sous" href="#broches">Broches du CPU</a>
+  <a href="#puces">Les puces de la carte</a>
+  <a class="sous" href="#puce-cpu">CPU SAB 80C166W</a>
+  <a class="sous" href="#puce-flash">Flash 28F200</a>
+  <a class="sous" href="#puce-ram">RAM 6264 (U21)</a>
+  <a class="sous" href="#puce-plcc">Décodeur PALCE16V8 (U22)</a>
+  <a class="sous" href="#puce-eeprom">EEPROM 24C04</a>
+  <a class="sous" href="#puce-can">Contrôleur CAN SAE81C91</a>
+  <a class="sous" href="#puce-satellite">Satellite ST9</a>
+  <a href="#onglets">Les onglets du bas</a>
+  <a class="sous" href="#memoire">Mémoire CPU</a>
+  <a class="sous" href="#capteurs">Capteurs</a>
+  <a class="sous" href="#tables">Tables</a>
+  <a class="sous" href="#moteur">Moteur virtuel</a>
+  <a class="sous" href="#cliquetis">Cliquetis</a>
+  <a class="sous" href="#chronogrammes">Chronogrammes</a>
+  <a class="sous" href="#courbes">Courbes</a>
+  <a class="sous" href="#pseudocode">Pseudocode</a>
+  <a class="sous" href="#symboles">Symboles</a>
+  <a class="sous" href="#accesbus">Accès bus</a>
+  <a class="sous" href="#pointsarret">Points d'arrêt</a>
+  <a class="sous" href="#interruptions">Interruptions</a>
+  <a class="sous" href="#kline">K-line</a>
+  <a class="sous" href="#can">CAN</a>
+  <a class="sous" href="#ews">EWS</a>
+  <a class="sous" href="#journal">Journal</a>
+  <a href="#reglages">Moteur, banc et réglages</a>
+  <a class="sous" href="#fenetremoteur">Fenêtre Moteur</a>
+  <a class="sous" href="#banc">Banc de puissance</a>
+  <a class="sous" href="#contact">Contact, EEPROM</a>
+  <a class="sous" href="#son">Son du moteur</a>
+  <a class="sous" href="#manette">Manette</a>
+  <a href="#fenetres">Fenêtres séparées</a>
+  <a href="#ecutool">MS41 ECU Tool intégré</a>
+  <a href="#menus">Menus et raccourcis</a>
+  <a href="#limites">Limites actuelles</a>
+</nav>
+
+<main>
+<h1 id="presentation">MS41 Simulator</h1>
+<p class="chapo">Simulateur du calculateur moteur BMW MS41.0 (processeur Siemens SAB80C166W à 12 MHz). Il exécute le
+vrai firmware lu dans le calculateur, instruction par instruction, avec ses périphériques, un moteur M52 virtuel
+branché sur ses broches et une ligne K pour les outils de diagnostic.</p>
+
+<p>Ce que l'on peut faire :</p>
+<ul>
+  <li>suivre le firmware pas à pas (désassemblage, registres, mémoire, points d'arrêt) ;</li>
+  <li>voir en direct quelles cellules des tables de calibration (définition RomRaider) le calculateur lit ;</li>
+  <li>faire tourner un moteur M52 virtuel (B20, B25 ou B28) : démarrage, ralenti régulé, accélérations, pannes de capteurs ;</li>
+  <li>l'entendre (son synthétisé, pops au lever de pied), couper et remettre le contact comme sur la voiture ;</li>
+  <li>le passer au <b>banc de puissance</b> : courbes de couple et de puissance mesurées au frein, comparées à une estimation tirée des tables ;</li>
+  <li>observer les signaux sur les broches (chronogrammes) et l'évolution des capteurs dans le temps (courbes) ;</li>
+  <li>dialoguer en K-line avec le calculateur simulé, directement ou avec <b>MS41 ECU Tool</b> intégré (identification, défauts, lecture et écriture de la flash).</li>
+</ul>
+<p>Un clic sur une image l'agrandit. Les numéros rouges des captures renvoient aux listes sous chaque image.</p>
+
+<h2 id="rapide">Démarrage rapide</h2>
+<ol class="etapes">
+  <li><b>Lancer le simulateur</b> : double-clic sur <i>MS41Simulator.jar</i> (Java 8 ou plus récent). La fenêtre de
+    démarrage MS41 SIMULATOR s'affiche pendant la préparation de la fenêtre principale.</li>
+  <li><b>Charger un full read</b> : <i>Fichier &gt; Charger full read…</i> (ou le bouton de la barre d'outils). N'importe quel dump de
+    256 Ko convient, lecture brute de la puce ou vue CPU : le format est détecté tout seul. Une définition RomRaider (fichier
+    XML) placée dans le dossier <i>docs/definitions</i> du simulateur est chargée automatiquement ; sinon <i>Fichier &gt;
+    Charger une définition RomRaider</i>. Sans définition, tout fonctionne sauf l'onglet Tables, la reconnaissance des injecteurs prévus par
+    la cartographie et l'estimation du banc d'après les tables.</li>
+  <li><b>Choisir le moteur</b> dans l'onglet <i>Moteur virtuel</i> : M52B20, B25 ou B28, et les injecteurs montés. La
+    cartographie ne permet pas de deviner le moteur ; le choix est mémorisé.</li>
+  <li><b>Cliquer sur « Démarrer »</b> dans le même onglet. Le moteur est branché, l'exécution (Run) est lancée et le
+    démarreur est actionné jusqu'à ce que le moteur tourne seul (en général en 1 à 2 s). Choisir la vitesse
+    <i>temps réel</i> pour voir le moteur évoluer à son rythme.</li>
+  <li><b>Jouer avec le moteur</b> : curseur <i>Papillon</i>, températures, pannes simulées. Suivre le résultat dans les
+    onglets <i>Courbes</i> et <i>Chronogrammes</i>, et dans <i>Tables</i> (cellules lues en orange).</li>
+  <li><b>Diagnostic</b> : <i>Outils &gt; MS41 ECU Tool</i> pour l'identification, les défauts et les données en direct.</li>
+</ol>
+
+<h2 id="fenetre">La fenêtre principale</h2>
+<figure>
+  <img src="images/fenetre_principale.png" alt="Fenêtre principale du simulateur, moteur en marche">
+  <figcaption>Fenêtre principale, moteur virtuel au ralenti.</figcaption>
+</figure>
+<ol class="reperes">
+  <li><b>Menus</b> : Fichier, Simulation, Outils, Fenêtres, Settings, Aide (voir <a href="#menus">Menus et raccourcis</a>).</li>
+  <li><b>En-tête</b> : calibration chargée (référence et index), temps simulé et pastille d'état de la simulation (voir <a href="#theme">Apparence</a>).</li>
+  <li><b>Barre d'outils</b> : chargement, Reset, Step (avec le nombre d'instructions par pas), Step over, Step out, Run, Pause.</li>
+  <li><b>Vitesse</b> de la simulation en Run : <i>temps réel</i> (12 MHz, le temps simulé suit l'horloge), <i>max</i> (aussi vite que possible) ou ralentie (1/10 à 1/1000, pour suivre les signaux à l'œil).</li>
+  <li><b>Temps simulé</b> et vitesse d'exécution (millions d'instructions par seconde réelle).</li>
+  <li><b>Désassemblage</b> du firmware autour de l'instruction courante.</li>
+  <li><b>Registres CPU</b> : PC, IP, CSP, PSW, pile, banque de registres…</li>
+  <li><b>Broches du CPU</b> : état de chaque broche, fréquence et rapport cyclique des signaux, tensions analogiques.</li>
+  <li><b>Onglets du bas</b> : chacun peut s'ouvrir dans sa propre fenêtre (double-clic sur l'onglet).</li>
+  <li><b>Barre d'état</b> : fichier chargé, format (brut / vue CPU), référence et index de la calibration.</li>
+</ol>
+
+<h3 id="theme">Apparence : thème sombre ou clair</h3>
+<p>Par défaut, le simulateur a l'apparence de <b>MS41 ECU Tool</b> : fond sombre, panneaux en cartes arrondies dont le
+titre est en majuscules bleues soulignées, boutons plats, onglet choisi en pastille bleue, texte clair. Les états gardent
+leurs couleurs : vert pour ce qui va bien (moteur démarré, octet de diagnostic accepté), orange pour une attention
+(voyant, octets lus), rouge pour une erreur ou une écriture. En haut, un <b>en-tête</b> rappelle la calibration chargée
+(référence et index), le temps simulé et l'état de la simulation dans une pastille : <b>EN MARCHE</b> (vert),
+<b>ARRÊT</b> (gris) ou <b>ARRÊT : POINT D'ARRÊT</b> (orange). Le bouton <b>Run</b> est en bleu.</p>
+<p><b>Settings &gt; Thème</b> : <i>Sombre (style MS41 ECU Tool)</i> ou <i>Clair (apparence du système)</i>, l'apparence
+d'avant (sans en-tête). Le choix est gardé et pris en compte au lancement suivant. Les captures de ce guide sont faites
+avec le thème sombre.</p>
+
+<h2 id="execution">Exécuter le firmware</h2>
+<table>
+  <tr><th>Commande</th><th>Raccourci</th><th>Effet</th></tr>
+  <tr><td>Reset</td><td></td><td>Mise sous tension et reset du CPU (RAM effacée).</td></tr>
+  <tr><td>Step</td><td><kbd>F7</kbd></td><td>Exécute 1 instruction (ou le nombre choisi à côté : ×10 … ×100 000).</td></tr>
+  <tr><td>Step over</td><td><kbd>F8</kbd></td><td>Exécute l'instruction ; un appel de fonction est exécuté en entier.</td></tr>
+  <tr><td>Step out</td><td><kbd>Maj</kbd>+<kbd>F8</kbd></td><td>Exécute jusqu'au retour de la fonction courante.</td></tr>
+  <tr><td>Run</td><td><kbd>F9</kbd></td><td>Exécution continue jusqu'à Pause, un point d'arrêt ou un trap matériel.</td></tr>
+  <tr><td>Pause</td><td><kbd>F6</kbd></td><td>Arrête l'exécution.</td></tr>
+  <tr><td>Exécuter jusqu'à la ligne</td><td><kbd>F4</kbd></td><td>Run jusqu'à la ligne sélectionnée du désassemblage.</td></tr>
+  <tr><td>Point d'arrêt sur la ligne</td><td><kbd>F2</kbd></td><td>Pose ou retire un point d'arrêt sur la ligne sélectionnée.</td></tr>
+</table>
+<p>Ces raccourcis fonctionnent aussi dans les fenêtres séparées.</p>
+
+<h3 id="desassemblage">Désassemblage</h3>
+<figure><img src="images/desassemblage.png" alt="Panneau de désassemblage"></figure>
+<ul>
+  <li><b>Aller à</b> : une adresse hexa (<code>430</code>, <code>0x20000</code>) ou un nom de label ; <b>&lt;</b> revient en arrière ; <b>Reset</b> va au point d'entrée.</li>
+  <li><b>DPP</b> : pages utilisées pour traduire les adresses mémoire 16 bits (valeurs du CPU en direct, ou valeurs après l'initialisation).</li>
+  <li><b>Double-clic</b> sur une ligne : suit le saut ou l'appel, ou affiche dans l'onglet Mémoire la donnée accédée.</li>
+  <li><b>Clic droit</b> : point d'arrêt ici (<kbd>F2</kbd>), exécuter jusqu'ici (<kbd>F4</kbd>), placer le PC ici.</li>
+  <li>La colonne <i>Commentaire</i> donne la cible des sauts et la valeur actuelle des variables lues (zone et contenu).</li>
+</ul>
+
+<div class="deux">
+<div>
+
+<div class="deux">
+<div>
+<h3 id="registres">Registres CPU</h3>
+<figure><img src="images/registres.png" alt="Panneau des registres"></figure>
+<p>Compteur d'instructions et de cycles, temps simulé, état du CPU (EINIT = initialisation terminée), puis les
+registres avec leur décodage (indicateurs du PSW, niveau d'interruption, pile, banque de registres).</p>
+</div>
+<div>
+<h3 id="broches">Broches du CPU</h3>
+<figure><img src="images/broches.png" alt="Panneau des broches du CPU"></figure>
+<p>Pour chaque broche : direction (E entrée / S sortie), latch, niveau, et pour les signaux qui changent leur
+<b>fréquence et rapport cyclique</b> (bobines, injecteurs, vanne de ralenti, VANOS…), avec la fonction et le
+numéro sur le connecteur X6000. <b>Double-clic</b> : bascule une entrée ou règle une tension AN0-AN9.
+La liste contient <b>toutes les broches du SAB 80C166W</b> avec leur numéro sur le boîtier : ports P0 (bus) à P5, et
+broches spéciales (quartz, configuration du bus, reset, NMI, référence du convertisseur, alimentations). La colonne
+<i>Fonction CPU</i> donne la fonction prévue par la datasheet, la dernière colonne l'usage sur la carte ; les broches que la
+carte n'utilise pas sont en gris. « Broches utilisées par la carte seulement » masque les autres.</p>
+</div>
+</div>
+
+<h2 id="puces">Les puces de la carte</h2>
+<p>Le simulateur reproduit la carte du calculateur puce par puce. L'onglet <b>Matériel</b> en bas de la fenêtre a un
+sous-onglet par boîtier : <b>CPU SAB 80C166W</b>, <b>Flash 28F200</b>, <b>RAM U21 (6264)</b>, <b>PLCC U22 (PALCE16V8)</b>
+et <b>EEPROM 24C04</b>. Le contrôleur CAN et le satellite n'ont pas de sous-onglet : ils se suivent dans leurs onglets
+(<a href="#can">CAN</a>, <a href="#capteurs">Capteurs</a>, <a href="#ews">EWS</a>).</p>
+<p>Chaque sous-onglet a trois parties :</p>
+<ul>
+  <li><b>Ce qui est émulé</b> : ce que le simulateur reproduit de la puce, et ce qu'il ne reproduit pas.</li>
+  <li><b>Broches</b> : numéro (quand le boîtier est connu), nom, sens, état et fonction sur la carte. Les broches de bus
+      montrent l'état du <i>dernier cycle</i> de la puce (adresse, donnée, lecture ou écriture) ; les autres sont en direct.</li>
+  <li><b>Contenu en direct</b> : les octets <span style="background:#d68018;color:#fff">lus</span> par le programme passent en
+      orange, ceux <span style="background:#d63c3c;color:#fff">écrits</span> en rouge, et la couleur s'estompe en 2 s (seules les
+      lectures de données sont colorées, pas la lecture du code). <i>Aller à</i> une adresse, <i>Dernier accès</i> : l'octet
+      touché en dernier. <b>Double-clic</b> : modifier un octet, comme avec un programmateur externe (le firmware voit la
+      nouvelle valeur). <i>Enregistrer… / Charger…</i> : le contenu de la puce dans un fichier.</li>
+</ul>
+
+<h3 id="puce-cpu">CPU Siemens SAB 80C166W</h3>
+<figure><img src="images/materiel_cpu.png" alt="Matériel, vue du CPU : description, PC, SP, dernier accès et RAM interne"></figure>
+<p>Le processeur 16 bits du calculateur (boîtier MQFP-100, 12 MHz). Il exécute le firmware lu dans le full read,
+instruction par instruction.</p>
+<ul>
+  <li><b>Émulé</b> : jeu d'instructions complet, registres et banques de registres (CP), PSW, pile, interruptions et
+      transferts PEC, timers GPT1 / GPT2, CAPCOM 16 canaux (capture et comparaison sur les broches), convertisseur
+      analogique 10 canaux, ports P0 à P5, liaisons série ASC0 (K-line) et ASC1 (satellite), watchdog, bus externe (flash en
+      16 bits, RAM et CAN en 8 bits). Le temps est compté en états CPU par instruction.</li>
+  <li><b>Pas émulé</b> : états d'attente exacts du bus, consommation.</li>
+  <li><b>Vue Matériel</b> : compteur de programme, pile, dernier accès, et la <b>RAM interne</b> (0xFA00-0xFDFF : registres
+      R0-R15 des banques, pile, variables du firmware).</li>
+  <li><b>Ailleurs</b> : <a href="#desassemblage">désassemblage</a>, <a href="#registres">registres</a>,
+      <a href="#broches">broches du CPU</a> (toutes les broches du boîtier, en direct), <a href="#interruptions">interruptions</a>,
+      <a href="#memoire">mémoire telle que le CPU la voit</a>, <a href="#pseudocode">pseudocode</a>.</li>
+</ul>
+
+<h3 id="puce-flash">Flash Intel 28F200</h3>
+<figure><img src="images/materiel_flash.png" alt="Matériel, vue de la flash 28F200"></figure>
+<p>La mémoire du programme et de la calibration : 256 Ko en mots de 16 bits, bloc de démarrage en bas (blocs de 16, 8, 8,
+96 et 128 Ko).</p>
+<ul>
+  <li><b>Émulé</b> : contenu dans l'ordre de la puce, interface de commande (lecture, registre d'état, identifiants,
+      programmation de mots, effacement par bloc), tension de programmation <b>VPP commandée par P2.6</b> (sans elle, la
+      programmation échoue). La ligne A13 de la puce est recalculée par le décodeur PLCC : adresse CPU = adresse puce
+      XOR 0x4000 (colonnes <i>Puce</i> et <i>CPU</i> de la vue).</li>
+  <li><b>Pas émulé</b> : durées de programmation et d'effacement (instantanées), endurance. Boîtier et numéros de broche
+      non relevés sur la carte (signaux seulement).</li>
+  <li><b>Programmer la flash</b> : comme sur la voiture, par la K-line avec <a href="#ecutool">MS41 ECU Tool</a>, ou
+      directement dans la vue (double-clic, <i>Charger…</i>). <i>Fichier &gt; Enregistrer la flash simulée</i> récupère le
+      résultat dans un fichier.</li>
+</ul>
+
+<h3 id="puce-ram">RAM UM6264A (U21)</h3>
+<figure><img src="images/materiel_ram.png" alt="Matériel, vue de la RAM 6264"></figure>
+<p>La RAM externe de 8 Ko où le firmware garde ses variables, adressée à l'octet.</p>
+<ul>
+  <li><b>Émulé</b> : sélection par le décodeur PLCC (broche 13), fenêtre 0xD800-0xF7FF en bus 8 bits (un accès mot = deux
+      cycles octet), lecture et écriture. Le contenu est mis à 0 à la mise sous tension (une vraie RAM démarre avec un
+      contenu quelconque ; le firmware l'initialise).</li>
+  <li><b>Pas émulé</b> : temps d'accès, conservation sans alimentation (le contenu est perdu quand le calculateur
+      s'éteint, voir <a href="#contact">Contact</a>).</li>
+  <li><b>Brochage</b> : standard 6264, 28 broches (CE2 non relevé sur la carte).</li>
+</ul>
+
+<h3 id="puce-plcc">Décodeur d'adresse PALCE16V8 (U22)</h3>
+<figure><img src="images/materiel_plcc.png" alt="Vue du décodeur PLCC U22 : broches, équations et carte mémoire"></figure>
+<p>Le décodeur d'adresse central : à partir des bits d'adresse du CPU, il choisit la puce qui répond (flash, CAN ou RAM).
+La vue donne l'état de ses 20 broches pour la dernière adresse présentée sur le bus externe, ses équations et la carte
+mémoire qui en découle (flash, CAN 0xD000-0xD7FF, RAM 0xD800-0xF7FF, zones sans boîtier).</p>
+<ul>
+  <li><b>Émulé</b> : les quatre équations relevées sur la puce : sélection de la flash, ligne A13 de la flash (recalculée),
+      sélection du CAN, sélection de la RAM.</li>
+  <li><b>Pas émulé</b> : broches 1, 9, 12, 17, 18 et 19 (sans effet sur la carte), temps de propagation.</li>
+</ul>
+<p><b>Équations modifiables</b> : les quatre sorties (broches 16, 15, 14, 13) s'écrivent avec les entrées <code>I1</code> à
+<code>I8</code> (I1 = A16, I2 = A14, I3 = A15, I4 = A12, I5 = A13, I6 = A11, I7 = A17, I8 tenue à 1), <code>/</code> pour « non »,
+<code>.</code> pour « et », <code>+</code> pour « ou », des parenthèses, et les constantes 0 et 1. <b>Programmer</b> charge les
+équations dans la puce : le bus du simulateur décode aussitôt avec elles (une équation fausse est refusée avec la
+raison). La carte mémoire se met à jour. Des équations différentes du relevé peuvent empêcher le firmware de trouver
+sa flash, sa RAM ou le CAN : une confirmation est demandée. <b>Relevé de la carte</b> remet les équations d'origine ;
+<b>Enregistrer… / Charger…</b> : fichier texte, une ligne par broche (<code>14 = /I2+/I3+/I4+I5+I6+I7+I1</code>).
+Les équations modifiées ne durent que la session : le relevé revient au lancement suivant.</p>
+
+<h3 id="puce-eeprom">EEPROM 24C04</h3>
+<figure><img src="images/materiel_eeprom.png" alt="Matériel, vue de l'EEPROM 24C04"></figure>
+<p>L'EEPROM série I²C de 512 octets (2 blocs de 256) où le calculateur garde ce qui doit survivre à la coupure du
+contact : adaptations, mémoire des défauts, position de repos du VANOS…</p>
+<ul>
+  <li><b>Émulé</b> : protocole bit par bit sur <b>P3.3 (SCL)</b> et <b>P3.12 (SDA)</b>, adresse et bit de bloc, pointeur
+      interne, écriture d'octet et de page (16 octets), lectures courante, aléatoire et séquentielle, acquittements.
+      La ligne du bas donne l'état de l'automate, le pointeur et les compteurs.</li>
+  <li><b>Pas émulé</b> : temps d'écriture (≈ 5 ms, ici immédiat), protection en écriture (broches A1, A2 et WP non relevées).</li>
+  <li><b>Contenu</b> : vierge par défaut (tout à FF), ou chargé depuis un fichier : menu <i>Fichier &gt; EEPROM simulée</i>
+      (voir <a href="#contact">Contact, post-fonctionnement et EEPROM</a>).</li>
+</ul>
+
+<h3 id="puce-can">Contrôleur CAN SAE81C91</h3>
+<p>Le contrôleur du bus CAN moteur, branché sur le bus externe du CPU (fenêtre 0xD000-0xD7FF, choisie par le décodeur PLCC).
+Le firmware y écrit les trames DME1, DME2 et DME4 et y lit celles de la boîte automatique.</p>
+<ul>
+  <li><b>Émulé</b> : registres et tampons de messages tels que le firmware les utilise, émission toutes les 10 ms,
+      acquittement par les autres calculateurs, erreur passive quand le calculateur est seul, bus-off sur court-circuit.</li>
+  <li><b>Où le voir</b> : onglet <a href="#can">CAN</a> (trames décodées, options), zone <i>CAN</i> de l'onglet
+      <a href="#memoire">Mémoire CPU</a>.</li>
+</ul>
+
+<h3 id="puce-satellite">Satellite ST9</h3>
+<p>Le second microcontrôleur de la carte, relié au CPU par la liaison série ASC1. Il mesure la température d'air, les
+capteurs de cliquetis et les entrées de clim, commande le relais du compresseur, transmet les messages de l'antidémarrage
+EWS et surveille les étages de sortie.</p>
+<ul>
+  <li><b>Émulé en boîte noire</b>, d'après les messages que le firmware attend (son propre programme n'a pas été lu) :
+      synchronisation et configuration, température d'air (message 0x108), cliquetis (gain reçu dans 0x101, niveau du
+      cylindre renvoyé dans 0x102), clim et relais du compresseur, messages EWS 0x109, diagnostic des 24 étages de sortie
+      (toujours sans défaut).</li>
+  <li><b>Où le voir</b> : fiches de l'onglet <a href="#capteurs">Capteurs</a> (température d'air, cliquetis, clim),
+      <a href="#cliquetis">Cliquetis</a>, onglet <a href="#ews">EWS</a> ; panne simulée « Satellite ST9 débranché » (code 100).</li>
+</ul>
+
+<h2 id="onglets">Les onglets du bas</h2>
+<p>L'onglet <b>Matériel</b> est décrit avec <a href="#puces">les puces de la carte</a>.</p>
+
+<h3 id="memoire">Mémoire CPU</h3>
+<figure><img src="images/memoire.png" alt="Onglet Mémoire CPU"></figure>
+<p>Vue hexadécimale de tout l'espace adressable <b>tel que le CPU le voit</b> : flash (dans l'ordre CPU), contrôleur CAN,
+RAM externe, RAM interne, registres SFR, zones sans boîtier. Elle complète l'onglet Matériel, qui
+montre <a href="#puces">chaque puce</a> séparément. Les boutons sautent aux zones utiles : vecteurs d'interruption, identification,
+calibration, code, CAN, RAM externe, RAM interne, SFR. La couleur de fond indique la zone ; les octets
+<span style="background:#d68018;color:#fff">lus</span> et <span style="background:#d63c3c;color:#fff">écrits</span> par le programme sont colorés en
+direct pendant l'exécution (la couleur s'estompe en 2 s). <b>Clic droit</b> sur un octet : point d'arrêt mémoire en
+écriture, en lecture ou les deux.</p>
+
+<h3 id="capteurs">Capteurs : caractéristiques de chaque capteur</h3>
+<figure><img src="images/capteurs.png" alt="Onglet Capteurs, fiche du vilebrequin avec le dessin de la couronne"></figure>
+<p>L'onglet <b>Capteurs</b> décrit le matériel qui transforme une grandeur physique en signal pour le calculateur, et
+permet de le modifier pour simuler un autre capteur. Les valeurs en direct et les courbes ne sont pas ici : elles sont
+dans l'onglet Moteur virtuel et dans les Courbes. Douze fiches à gauche : vilebrequin (couronne PMH), arbre à cames,
+débitmètre HFM, papillon (potentiomètre), température moteur, température d'air, vitesse véhicule, sondes lambda,
+capteurs de cliquetis, retour d'allumage, batterie, pression de clim. Chaque fiche donne :</p>
+<ul>
+  <li>le <b>principe</b> du capteur et son chemin jusqu'au calculateur (broche, entrée analogique ou satellite) ;</li>
+  <li>sa <b>référence</b> et ses <b>caractéristiques</b>. Seules les données connues des documents du projet sont
+      pré-remplies (couronne 60-2 à effet Hall, corps de papillon BMW 13541433385 de 64 mm, 5858 impulsions par km…) ;
+      les autres références sont marquées « non renseignée ». Les deux champs se modifient et sont gardés d'un lancement à
+      l'autre ;</li>
+  <li>quand le capteur est réglable, ses <b>caractéristiques électriques</b> : <i>Appliquer</i> les prend en compte
+      tout de suite, <i>D'origine</i> remet celles du capteur BMW.</li>
+</ul>
+<p><b>Vilebrequin</b> : nombre de dents de la couronne et nombre de dents manquantes, avec le dessin de la couronne (dents,
+trou en rouge, position du capteur, dent 0), et le type de capteur : <b>effet Hall</b> (signal carré 0-5 V, présent dès
+l'arrêt) ou <b>inductif</b> (tension alternative dont l'amplitude croît avec le régime ; amplitude pour 1000 tr/min et
+seuil d'entrée réglables). Un tableau croise les deux types avec la couronne choisie : signal, amplitude, régime minimal
+détecté, fronts utilisés, alimentation, pas angulaire, largeur du trou. Les valeurs du capteur inductif sont un modèle
+(non mesurées). Le firmware MS41 attend une couronne 60-2 : avec une autre couronne il ne se synchronise pas et le moteur
+ne démarre pas, comme sur la voiture ; avec un capteur inductif dont le seuil est trop haut, il n'y a plus de signal
+au régime du démarreur.</p>
+<figure><img src="images/capteurs_papillon.png" alt="Fiche du papillon : bornes et loi du potentiomètre"></figure>
+<p><b>Papillon</b> : tension papillon fermé et grand ouvert, et loi du potentiomètre : <b>linéaire</b>,
+<b>logarithmique</b> (10 % de la course électrique à mi-course) ou <b>anti-logarithmique</b> ; le graphique montre
+la tension selon l'ouverture. <b>Vitesse véhicule</b> : impulsions par km. <b>Débitmètre, températures moteur et d'air</b> :
+la courbe du capteur dans un tableau modifiable (ajouter / retirer des points ; la grandeur physique doit croître
+strictement), et la tension du débitmètre sans débit. Les courbes d'origine viennent de la calibration ID41, qui
+décrit les capteurs montés par BMW.</p>
+<p>Ces réglages sont gardés d'un lancement à l'autre. Quand l'un d'eux diffère de l'origine, la barre d'état de l'onglet
+affiche <b>CAPTEURS MODIFIÉS</b> ; <i>Tout remettre d'origine</i> revient aux capteurs BMW (références et textes
+conservés).</p>
+
+<h3 id="tables">Tables</h3>
+<figure><img src="images/tables.png" alt="Onglet Tables avec la carte d'avance de base"></figure>
+<ul>
+  <li>À gauche, les tables de la définition RomRaider, par catégorie. <b>Filtre</b> pour chercher par nom ;
+      <b>Lues récemment</b> ne garde que les tables que le firmware est en train de lire.</li>
+  <li>À droite, la table choisie avec ses axes. Les <b>cellules lues par le CPU sont surlignées en orange</b>, en direct :
+      on voit le point de fonctionnement se déplacer quand le régime ou la charge changent. <b>Valeurs brutes</b> affiche
+      les octets au lieu des valeurs converties.</li>
+  <li>Sous la table, la description (rôle, routine du firmware qui la lit).</li>
+  <li><b>Ouvrir dans une fenêtre</b> (ou double-clic sur la table) : la table dans sa propre fenêtre, pour en suivre plusieurs à la fois.</li>
+</ul>
+
+<h3 id="moteur">Moteur virtuel</h3>
+<figure><img src="images/moteur_virtuel.png" alt="Onglet Moteur virtuel"></figure>
+<ol class="reperes">
+  <li><b>Brancher le moteur virtuel</b> sur les broches du calculateur (capteurs en entrée, actionneurs mesurés en sortie).
+      Il est branché au lancement du simulateur, en mode <i>Moteur libre (modèle)</i>.</li>
+  <li><b>Démarrer</b> : fait tout ce qu'il faut pour que le moteur parte (branche le moteur, lance Run, passe en moteur libre,
+      actionne le démarreur jusqu'à ce que le moteur tienne seul ; abandon au bout de 5 s avec la raison).</li>
+  <li><b>Démarreur (maintenir)</b> : démarreur actionné tant que le bouton est enfoncé. À froid, il faut maintenir 1,5 à 3 s,
+      comme sur une vraie voiture.</li>
+  <li><b>Couper le contact</b> : coupe le +15, comme la clé : le calculateur arrête le moteur, garde le relais principal
+      quelques secondes (post-fonctionnement, sauvegarde de l'EEPROM) puis s'éteint (voir <a href="#contact">Contact, EEPROM</a>).</li>
+  <li><b>Contact (+15)</b> : état de la clé ; recocher remet le calculateur sous tension (RAM perdue, EEPROM relue, nouvel échange EWS).</li>
+  <li><b>Mode</b> : <i>Arrêt</i>, <i>Démarreur</i> (régime fixe de 220 tr/min), <i>Régime imposé</i> (le curseur fixe le régime,
+      pratique pour explorer les tables), <i>Moteur libre</i> (le régime résulte des combustions et des frottements).</li>
+  <li><b>Moteur</b> monté sur le banc : M52B20, B25, B28 ou le moteur <i>personnalisé</i> (cylindrée, remplissage, frottements).</li>
+  <li><b>Injecteurs</b> montés : Bosch 0 280 150 415 (vert), 440 (rose) ou <i>personnalisés</i>, avec leur débit et leur temps mort réels.</li>
+  <li><b>Réglages du moteur…</b> : ouvre la <a href="#fenetremoteur">fenêtre Moteur</a> (fiches des M52, moteur et injecteurs personnalisés, pression atmosphérique, pression d'essence, retard du VANOS). En dessous : <b>Banc de puissance…</b> (<a href="#banc">banc</a>). L'antidémarrage a son propre onglet, <a href="#ews">EWS</a>.</li>
+  <li><b>Injecteurs de la cartographie</b> : reconnus à sa table de temps mort. Si ceux montés diffèrent, l'écart de
+      mélange attendu est affiché (ex. « mélange appauvri de 24 % »).</li>
+  <li><b>Résultat du démarrage</b> (temps mis, ou raison de l'échec).</li>
+  <li><b>Capteurs</b> : régime imposé, papillon, températures moteur et air, vitesse du véhicule, charge extérieure
+      (boîte…), batterie, <b>pression de clim</b> ; montée en température automatique, batterie automatique,
+      <b>clim demandée</b>.
+      <br>Climatisation : selon le codage de la cartographie, le calculateur lit soit le capteur de pression
+      (au-dessus de 5,7 bar : ralenti clim ; au-dessus de 9,6 bar : compresseur ; au-delà de 24 bar : coupure),
+      soit les entrées « clim demandée ». Quand il autorise le compresseur, le satellite colle le relais,
+      le compresseur prend du couple au moteur (ligne <b>Compresseur de clim</b> des lectures) et le bit 6 de DME1
+      passe à 1 dans l'onglet CAN. Pied à fond, le calculateur le coupe environ 4 s. La pression au repos vaut 5 bar.</li>
+  <li><b>Pannes simulées</b> : capteur coupé (vilebrequin, came, débitmètre, papillon, température, sondes lambda,
+      vitesse, retour d'allumage), défaut matériel du HFM, signaux ABS/ASC, satellite débranché, EEPROM absente,
+      EWS muet ou d'une autre voiture, <b>VANOS bloqué</b> au repos ou en avance (code 212). Utile pour provoquer les codes défaut.</li>
+  <li><b>Cliquetis</b> (sous les capteurs) : carburant (91, 95, 98 ou 100 RON), cliquetis naturel du moteur, cliquetis
+      provoqué sur un cylindre ou sur tous (intensité en multiple du bruit du moteur, fréquence en % des cycles),
+      capteur 1 (cylindres 1-2-3) ou capteur 2 (cylindres 4-5-6) débranché. Voir <a href="#cliquetis">Cliquetis</a>.</li>
+  <li><b>Valeurs du moteur et lectures du firmware</b>, côte à côte : régime, air, lambda, température, avance,
+      vanne de ralenti, VANOS, compte-tours, relais, voyant, compresseur de clim, défauts actifs, couple…</li>
+  <li><b>Diagnostic</b> en clair : « le moteur tourne », ou ce qui l'en empêche (antidémarrage, synchronisation perdue,
+      pas d'injection, mélange noyé, démarreur relâché trop tôt…).</li>
+  <li><b>Actionneurs par cylindre</b>, mesurés sur les broches : durée d'injection, fin d'injection, charge de bobine,
+      avance, lambda du dernier cycle, nombre de combustions, et pour le cliquetis : marge à la limite de cliquetis,
+      nombre de combustions cliquetantes, niveau mesuré par le capteur, retard décidé par le firmware.</li>
+</ol>
+
+<h4 id="cliquetis">Cliquetis</h4>
+<figure><img src="images/cliquetis.png" alt="Cliquetis au 91 RON, pleine charge à 3000 tr/min : retard du firmware en dents de scie"></figure>
+<p>Le cliquetis suit le même chemin que sur la voiture : le moteur cliquette, le <b>capteur</b> le transmet au
+<b>satellite</b>, qui mesure chaque cylindre pendant la fenêtre ouverte par le calculateur (<code>P3.6</code>, de 0 à 60°
+après le PMH) et renvoie un niveau (message <code>0x102</code>). C'est le <b>firmware</b> qui compare ce niveau à sa
+référence, retarde l'avance du cylindre qui cliquette, puis la ramène peu à peu.</p>
+<ul>
+  <li><b>Cliquetis naturel</b> : le moteur cliquette quand l'avance appliquée dépasse sa limite de cliquetis, qui
+      baisse avec la charge, la température d'air et d'eau, un indice d'octane faible, un mélange pauvre ou une
+      compression plus forte, et monte avec le régime. Les combustions varient d'un cycle à l'autre : le cliquetis est
+      intermittent. Moteur d'origine au 95 : quelques retards de 1 à 2° à pleine charge vers 3000 tr/min ; au 91,
+      retard de 8 à 10° ; au 98, aucun.</li>
+  <li><b>Cliquetis provoqué</b> : ajouté au cliquetis naturel, sur le cylindre choisi. Seul ce cylindre est retardé.</li>
+  <li><b>Capteur débranché</b> : le satellite ne reçoit plus que du bruit électrique pour ses trois cylindres ; le
+      firmware mémorise le code 57 (capteur 1) ou 59 (capteur 2).</li>
+  <li><b>Courbes</b> par cylindre : <i>Cliquetis moteur</i> (intensité de chaque combustion), <i>Marge au cliquetis</i>,
+      <i>Niveau capteur cliquetis</i> (valeur renvoyée par le satellite), <i>Retard cliquetis firmware</i>.
+      Sur la capture : au 91 RON, chaque pic de cliquetis fait reculer l'avance d'un cran, qui remonte lentement jusqu'au
+      cliquetis suivant.</li>
+</ul>
+<p><b>Ce qui est un modèle</b> : la limite de cliquetis du moteur et le traitement interne du satellite (échelle du
+niveau, bruit mécanique) ne sont pas mesurés sur la voiture ; ils sont réglés pour un comportement réaliste.</p>
+
+<h3 id="chronogrammes">Chronogrammes</h3>
+<figure><img src="images/chronogrammes.png" alt="Onglet Chronogrammes"></figure>
+<p>Les signaux logiques sur les broches, comme sur un analyseur logique : vilebrequin 60-2 et came, bobines,
+injecteurs (ordre d'allumage 1-5-3-6-2-4), retour d'allumage, compte-tours, vanne de ralenti, VANOS, voyant, fenêtre de
+cliquetis (P3.6). <b>Fenêtre</b> : durée affichée (500 ms par défaut : environ trois cycles moteur au ralenti) ;
+<b>Caler sur le PMH cyl. 1</b> (coché par défaut) : la fin de la fenêtre est calée sur le dernier PMH du cylindre 1, l'image
+reste stable ; <b>Figer</b> : arrête le défilement ; <b>Voies…</b> : choix des signaux. Le survol de la souris ne fait que
+tracer un trait vertical : il ne déplace pas l'image.</p>
+<p><b>Marqueurs</b> (simulation en pause ou <i>Figer</i> coché) : un clic pose un marqueur, accroché au front le plus proche de
+la voie cliquée ; un clic droit retire le marqueur le plus proche ; <i>Effacer les marqueurs</i> les retire tous (8 au plus).
+Sous le tracé : l'écart entre marqueurs successifs, la fréquence correspondante et l'angle vilebrequin (au régime mesuré
+dans la fenêtre, un front de came par tour). Exemple : deux fronts montants du compte-tours à 900 tr/min sont écartés de
+22,2 ms, soit 45 Hz (3 impulsions par tour).</p>
+
+<h3 id="courbes">Courbes</h3>
+<figure><img src="images/courbes.png" alt="Onglet Courbes pendant deux coups d'accélérateur"></figure>
+<ol class="reperes">
+  <li><b>Voies affichées</b> : capteurs en valeur physique, tensions sur les broches du calculateur (AN0-AN9),
+      moteur et actionneurs, <b>voies par cylindre</b> (injection, avance, charge de bobine, lambda de chaque combustion,
+      cliquetis du moteur, marge au cliquetis, niveau du capteur, retard de cliquetis du firmware, cylindres 1 à 6), valeurs lues dans la RAM du firmware. Le choix est mémorisé.</li>
+  <li><b>Durée affichée</b> : de 5 s à 10 min de temps simulé (l'enregistrement garde les 10 dernières minutes, un point toutes les 10 ms).</li>
+  <li><b>Figer l'affichage</b> pour lire tranquillement ; l'enregistrement continue. <i>Échelle automatique</i> ajuste chaque
+      piste aux valeurs affichées (sinon : plage fixe de la voie). Les tensions des broches (0 à 5,2 V, pleine échelle du
+      convertisseur) et la batterie (0 à 16 V) gardent toujours leur échelle, marquée <i>(fixe)</i>.
+      <i>Cylindres superposés</i> : les cylindres cochés d'une même grandeur sur une seule piste, une couleur par cylindre,
+      avec la valeur de chacun.</li>
+  <li><b>Exporter CSV</b> : tout l'enregistrement, toutes les voies (séparateur <code>;</code> et virgule décimale : s'ouvre directement dans Excel).</li>
+  <li><b>Pistes</b> : une par voie, avec sa propre échelle et sa valeur actuelle. En survolant avec la souris, un
+      curseur donne la valeur de toutes les pistes à l'instant pointé.</li>
+</ol>
+<p>Sur la capture : deux coups d'accélérateur. On voit le régime monter, l'air et la tension du débitmètre suivre, la
+vanne de ralenti se fermer, puis la coupure d'injection en décélération (lambda au maximum).</p>
+
+<h3 id="pseudocode">Pseudocode</h3>
+<figure><img src="images/pseudocode.png" alt="Onglet Pseudocode : fonction 26E16 avec niveaux de confiance"></figure>
+<p>L'onglet <b>Pseudocode</b> traduit une fonction du firmware en pseudo-C, ligne par ligne, avec l'instruction d'origine à
+droite. Il est produit par le désassembleur du simulateur (pas par IDA). Saisir une adresse ou un label, ou utiliser
+<b>Fonction du PC</b> (la fonction en cours d'exécution) ou <b>Ligne du désassemblage</b> (la ligne sélectionnée en haut) ;
+sans label, le début de la fonction est deviné (après le retour qui précède) et c'est indiqué. <b>Double-clic</b> sur une
+ligne : l'instruction dans le désassemblage. À l'arrêt, la ligne du PC est surlignée.</p>
+<ul>
+  <li><b>H</b> (vert) : traduction directe d'une instruction (affectation, opération, bit, appel direct, retour).</li>
+  <li><b>M</b> (orange) : condition reconstruite à partir des drapeaux de l'instruction précédente sur le même chemin
+      (comparaison, soustraction…), ou accès mémoire par une page DPP 0-2 supposée constante (calibration
+      <code>CAL_xxxx</code>…).</li>
+  <li><b>B</b> (rouge) : saut ou appel indirect (cible inconnue), drapeaux venus d'un autre chemin, octets non décodés.</li>
+</ul>
+<p>Le pseudocode garde les étiquettes et des <code>goto</code> : il ne prétend pas retrouver les <code>if</code> et
+<code>while</code> du programme d'origine. Les noms viennent des labels (fichier chargé, labels automatiques des vecteurs,
+SFR) ; sinon <code>M[0xE9B6]</code> pour la RAM et <code>CAL_01F7</code> pour la calibration. Sur les 314 fonctions appelées
+du firmware ID41 : environ 89 % de lignes H, 10 % M, 0,2 % B.</p>
+
+<h3 id="symboles">Symboles</h3>
+<figure><img src="images/symboles.png" alt="Onglet Symboles"></figure>
+<p>Liste des noms connus (vecteurs, registres, labels chargés par <i>Fichier &gt; Charger des labels</i>). <b>Filtre</b>
+pour chercher ; <b>double-clic</b> pour afficher l'adresse dans le désassemblage.</p>
+<p><b>Noms automatiques propres au CPU</b>, sans fichier de labels : chaque vecteur matériel saute vers une table de relais
+puis vers son gestionnaire ; le simulateur suit ces sauts au chargement du full read et nomme <code>CC15INT_relais</code>,
+<code>CC15INT_isr</code>, <code>RESET_entree</code>… Un vecteur qui saute sur lui-même (source jamais armée par le programme)
+est nommé <code>…_boucle</code>. Les pointeurs PEC de la RAM interne (<code>SRCP0</code>-<code>DSTP7</code>) et les registres
+SFR sont nommés aussi. Un label chargé depuis un fichier reste prioritaire.</p>
+
+<h3 id="accesbus">Accès bus</h3>
+<figure><img src="images/acces_bus.png" alt="Onglet Accès bus"></figure>
+<p>Journal des lectures (R) et écritures (W) de données faites par le programme : numéro d'ordre, instruction qui accède,
+adresse, zone, valeur, symbole. Les registres R0-R15, la pile et la lecture du code ne sont pas journalisés.</p>
+<ul>
+  <li><b>Filtres</b> : zones (flash, CAN, RAM externe, RAM interne, SFR, zones non câblées), <i>Lectures</i> / <i>Écritures</i>,
+      plage d'<b>adresses</b> en hexa (bornes incluses, vide = tout ; valeur en rouge si elle n'est pas valide).
+      Les filtres agissent <b>à la capture</b> : le tampon ne se remplit qu'avec les accès retenus. Exemple : seule la zone
+      <i>RAM int</i> et la plage <code>FB26</code>-<code>FB2B</code> pour suivre le retard de cliquetis des six cylindres.
+      Resserrer un filtre masque aussi les lignes déjà capturées ; l'élargir ne fait pas revenir les accès qui n'ont pas été gardés.</li>
+  <li><b>Tampon</b> de 20 000, 100 000 ou 500 000 lignes. Le firmware fait environ 600 000 accès de données par seconde simulée :
+      sans filtre, 20 000 lignes couvrent environ 30 ms.
+      <i>Circulaire</i> garde les derniers accès ; <i>Arrêt quand plein</i> garde les premiers après <b>Effacer</b> et l'indique (« TAMPON PLEIN »).</li>
+  <li><b>Compteurs</b> : lignes affichées, remplissage du tampon, accès retenus, accès par seconde, et sur la deuxième ligne
+      <b>tous</b> les accès vus par zone, filtrés ou non. Ils continuent pendant l'exécution, même tampon plein.</li>
+  <li><b>Suivre en direct</b> : la liste se met à jour 4 fois par seconde pendant l'exécution ; décoché, seuls les compteurs bougent
+      et la liste est mise à jour à la pause.</li>
+  <li><b>Double-clic</b> : dans la colonne <i>Instr.</i>, va au code ; ailleurs, montre la donnée.</li>
+</ul>
+
+<h3 id="pointsarret">Points d'arrêt</h3>
+<figure><img src="images/points_arret.png" alt="Onglet Points d'arrêt avec deux exemples"></figure>
+<ul>
+  <li><b>Code</b> (à gauche) : arrêt <i>avant</i> l'instruction à l'adresse. La case <i>Actif</i> permet de le garder sans qu'il serve.</li>
+  <li><b>Mémoire</b> (à droite) : arrêt <i>après</i> l'instruction qui lit ou écrit une plage d'adresses, éventuellement
+      seulement pour une valeur donnée. Exemple : <code>E655</code> écrit avec <code>AA</code> (fin des contrôles de CRC au démarrage, configuration du satellite validée).
+      La colonne <i>Déclenchements</i> compte les arrêts.</li>
+</ul>
+
+<h3 id="interruptions">Interruptions</h3>
+<figure><img src="images/interruptions.png" alt="Onglet Interruptions"></figure>
+<p>À gauche, chaque source d'interruption (CAPCOM CC0-CC15, timers T0-T6, ADC, liaisons série…) avec son vecteur,
+ses bits d'autorisation (IE) et de demande (IR), ses niveaux de priorité et le nombre de fois où elle a été servie.
+À droite, les 8 canaux PEC (transferts automatiques sans interruption) : compteur, taille, source, destination.</p>
+
+<h3 id="kline">K-line</h3>
+<figure><img src="images/kline.png" alt="Onglet K-line avec une identification"></figure>
+<p>Le trafic sur la ligne K virtuelle, trame par trame, avec l'heure simulée et le sens (outil → DME, DME → outil). La
+barre du haut donne les débits (calculateur et outil, 9600 bauds 8E2) et les compteurs. En bas, on peut envoyer
+une trame DS2 à la main : taper les octets en hexa <b>sans</b> le checksum, il est ajouté automatiquement. Exemples :
+<code>12 04 00</code> identification, <code>12 05 04 00</code> lecture des défauts. Run doit être lancé pour que le calculateur réponde.</p>
+
+<h3 id="can">CAN</h3>
+<figure><img src="images/can.png" alt="Onglet CAN"></figure>
+<p>Le bus CAN moteur (500 kbit/s) et le contrôleur SAE81C91 du calculateur. Le tableau montre la dernière trame de
+chaque identifiant, décodée : <b>DME1</b> <code>0x316</code> (régime, charge), <b>DME2</b> <code>0x329</code> (températures
+moteur et air, vitesse, papillon), <b>DME4</b> <code>0x545</code> (refus EWS, consommation, surchauffe), toutes les 10 ms.
+Options :</p>
+<ul>
+  <li><b>Autres calculateurs sur le bus</b> : ils acquittent les trames. Décoché (réglage au lancement), le calculateur est
+      seul, comme sur un banc : ses trames restent en attente et le contrôleur passe en erreur passive.</li>
+  <li><b>Court-circuit CAN H / CAN L</b> : bus-off. Le firmware met le contrôleur en reset et le réinitialise quand le
+      court-circuit disparaît (s'il surveille le bus : seulement avec une boîte automatique codée ou détectée).</li>
+  <li><b>Boîte automatique (EGS)</b> : envoie EGS1 <code>0x43F</code> (code de rapport, réduction de couple). Le calculateur
+      ne détecte la boîte que dans la demi-seconde qui suit la mise sous tension : cocher, puis couper et remettre le
+      contact. Décocher ensuite : message absent, code 217. Les codes 216 et 219 existent dans le firmware mais leur
+      pas d'anti-rebond vaut 0 dans la calibration ID41 : ils ne sont jamais mémorisés.</li>
+</ul>
+
+<h3 id="ews">EWS (antidémarrage)</h3>
+<p>Onglet <b>EWS</b> en bas de la fenêtre principale (détachable comme les autres), aussi ouvert par <i>Outils &gt; EWS (antidémarrage)</i>.
+Couper et remettre le contact ne met pas la simulation en pause : calculateur éteint, le temps continue de passer et la
+remise du contact le rallume (nouvel échange EWS).</p>
+<figure><img src="images/ews.png" alt="Onglet EWS"></figure>
+<ol class="reperes">
+  <li><b>Calculateur</b> : l'ISN inscrit dans le calculateur (4 caractères à l'adresse <code>0x1CEA</code>) et le code de
+      12 bits qu'il en tire et attend de l'EWS (<code>0xF0BE</code>) ; l'état de l'autorisation de démarrage ; boutons pour
+      couper et remettre le contact (l'échange a lieu à chaque mise sous tension).</li>
+  <li><b>AUTOMATIC EWS</b>, cochée par défaut : le boîtier EWS prend l'ISN attendu par le calculateur, le démarrage est
+      toujours autorisé.</li>
+  <li><b>ISN inscrit dans l'EWS</b>, quand la case est décochée : 4 chiffres (ou le code 12 bits en hexa), <i>Inscrire</i>.
+      <i>Copier l'ISN du calculateur</i>, ou <i>EWS d'une autre voiture</i> pour un ISN différent : refus de démarrage et code 209.</li>
+  <li><b>Pannes</b> : EWS débranché (ne répond plus : refus et code 18), somme de contrôle faussée (code 18).</li>
+  <li><b>Journal des échanges</b> : chaque message <code>0x109</code> que l'EWS envoie au calculateur par le satellite, avec
+      l'ISN envoyé, l'ISN attendu et le résultat de la même vérification que le firmware (<code>EWS_CodeCheck</code>).</li>
+</ol>
+<p>Le message change à chaque envoi (code tournant : 4096 formes pour un même ISN), le calculateur vérifie toujours la
+même relation. Le détail du codage est rappelé sous le journal.</p>
+
+<h3 id="journal">Journal</h3>
+<figure><img src="images/journal.png" alt="Onglet Journal"></figure>
+<p>Messages du simulateur : chargements, choix de la définition et problèmes relevés dans le XML, traps, arrêts sur
+point d'arrêt, connexion de MS41 ECU Tool… Au chargement d'un full read, le Journal signale les sommes de contrôle
+fausses : le calculateur posera alors le code 100 (raison 0x400), comme un vrai MS41.</p>
+
+<h2 id="reglages">Moteur, banc et réglages</h2>
+
+<h3 id="fenetremoteur">Fenêtre Moteur : caractéristiques et réglages</h3>
+<p>Ouverte par le bouton <b>Réglages du moteur…</b> de l'onglet Moteur virtuel, ou par <i>Outils &gt; Moteur : caractéristiques et réglages</i>.
+Sa position est mémorisée.</p>
+<figure><img src="images/moteur_fiche.png" alt="Fenêtre Moteur, fiche du M52B28"><figcaption>Fiche du M52B28.</figcaption></figure>
+<ol class="reperes">
+  <li><b>Moteur et injecteurs simulés</b> en ce moment, avec le débit réel des injecteurs à la pression d'essence réglée.</li>
+  <li><b>Onglets</b> : une <b>fiche par M52</b> (B20, B25, B28) avec les caractéristiques constructeur (géométrie, embiellage, vilebrequin, arbres à cames, VANOS, soupapes, couple et
+      puissance, injecteurs…), et l'onglet <b>Personnalisé</b>. Sur une fiche : <i>Simuler ce moteur</i> (avec ses injecteurs
+      d'origine) ou <i>Copier dans Personnalisé</i> comme point de départ.</li>
+  <li><b>Conditions</b>, valables pour tous les moteurs : <b>pression atmosphérique réelle</b> (en hPa, ou par l'altitude,
+      les deux sont liées) et <b>pression d'essence</b> (régulateur). La densité de l'air qui en résulte (avec la température
+      d'air) est affichée : le remplissage et le couple suivent la même proportion. Le MS41 n'a pas de capteur de pression :
+      le débitmètre mesure la masse d'air réelle, le calculateur dose donc correctement en altitude.</li>
+</ol>
+<figure><img src="images/moteur_personnalise.png" alt="Fenêtre Moteur, onglet Personnalisé"><figcaption>Onglet Personnalisé.</figcaption></figure>
+<p>L'onglet <b>Personnalisé</b> décrit un moteur modifié et des injecteurs changés sur la voiture :</p>
+<ul>
+  <li><b>Moteur</b> : cylindrée, taux de compression (rendement du cycle), remplissage en % de celui du M52 d'origine
+      (arbres à cames, admission, culasse…), frottements, inertie du vilebrequin et du volant (volant allégé :
+      le régime monte plus vite), <b>collecteur d'admission</b> (M52 d'origine, identique sur B20/B25/B28, ou collecteur
+      de M50B25 : conduits de 30 cm de 55 × 25 mm, comme le port de la culasse, au lieu de 45 × 23 mm ; environ +7 kW vers
+      6000 tr/min et −2 % de couple vers 2500-3000 tr/min sur un B28), couple et puissance de référence pour comparer au banc.</li>
+  <li><b>Injecteurs</b> : débit statique (cm³/min à 3 bar, fiche du fabricant) et courbe de temps mort selon la tension
+      (courbes Bosch 415 / 440 en point de départ, ±10 %). La ligne du bas indique le décalage de mélange attendu par
+      rapport aux injecteurs prévus par la cartographie : par exemple, des injecteurs de 300 cm³/min sur une cartographie
+      prévue pour les 440 (231 cm³/min) enrichissent le mélange de 30 %.</li>
+  <li><b>Appliquer</b> enregistre ces valeurs ; les cases <i>Simuler ce moteur</i> et <i>Monter ces injecteurs</i> les
+      mettent en service. L'effet est immédiat, moteur en marche (à suivre dans les Courbes : lambda, couple).</li>
+</ul>
+<p><b>VANOS (retard hydraulique)</b>, dans les conditions : le calculateur commande l'électrovanne en tout-ou-rien, mais le
+mécanisme met quelques tours à réagir puis à décaler la came (pression d'huile). Quatre réglages, en <b>tours moteur</b> :
+attente puis course à l'engagement (2 + 4 par défaut), attente puis course au relâchement (1 + 3). La position réelle de la
+came se suit dans les Courbes (voie <i>VANOS</i>) ; le firmware la mesure et en tient compte (corrections de carburant et
+d'avance, code 212 si elle ne suit pas la commande). Le VANOS décale réellement l'arbre d'admission dans le moteur
+virtuel (axe de came 115° → 90° après le PMH sur le B28) : le remplissage et les gaz résiduels sont calculés degré par degré
+à partir des 24 soupapes (2 admission de 33 mm et 2 échappement de 30,5 mm par cylindre), du piston, des conduits du
+collecteur et du calage (aucun pourcentage imposé). Came avancée : meilleur remplissage à bas et moyen
+régime, moins bon au-delà de ~3900 tr/min, et plus de gaz résiduels au ralenti (VANOS bloqué en avance : ralenti bas et
+irrégulier).</p>
+
+<h3 id="banc">Banc de puissance</h3>
+<p>Ouvert par le bouton <b>Banc de puissance…</b> de l'onglet Moteur virtuel, ou par <i>Outils &gt; Banc de puissance</i>.
+Un frein à courants de Foucault virtuel tient le régime demandé : moteur stabilisé, le couple de freinage est égal au
+couple du moteur ; c'est ce que mesure le banc. Le firmware ne sait rien du banc : il voit un moteur à pleine charge.</p>
+<figure><img src="images/banc_puissance.png" alt="Banc de puissance, tir pleine charge du M52B28"><figcaption>Tir pleine charge du M52B28 (injecteurs 440) de 1500 à 6500 tr/min à 300 tr/min/s, puis lever de pied : pertes du moteur en pointillés orange.</figcaption></figure>
+<ol class="reperes">
+  <li><b>Balayage pleine charge par paliers</b> : papillon à 100 %, paliers de régime (début, fin, pas). À chaque palier, le frein
+      stabilise le régime puis mesure pendant 0,5 s. Le moteur est démarré si besoin. La <b>vitesse simulée</b> suit le régime
+      (36 km/h pour 1000 tr/min ≈ 4e d'une E36) : véhicule à l'arrêt, le firmware poserait un défaut de vitesse à pleine
+      charge. <i>Moteur chaud</i> impose 90 °C pendant le balayage. Tout est remis comme avant à la fin.</li>
+  <li><b>Tir</b>, comme sur un vrai banc : le moteur est tenu au régime de début, pied à fond, puis le frein le laisse
+      monter à vitesse constante (<i>montée de … tr/min par seconde</i>, 300 par défaut ; un banc moteur travaille entre 200 et
+      500) jusqu'au régime de fin. Le couple est mesuré en continu, par tranches de 100 tr/min : couple du frein + inertie du
+      moteur × accélération. Au régime de fin, la pédale est relâchée et le frein ramène le moteur au régime de début (1000 tr/min
+      par seconde) ; au passage, le banc mesure les <b>pertes du moteur entraîné</b> (frottements + pompage, injection coupée),
+      tracées en pointillés orange. On entend tout le tir. Pendant une montée continue, le calculateur ne voit pas exactement
+      la même chose qu'en paliers (enrichissement, avance) : les deux mesures peuvent différer de quelques %.</li>
+  <li><b>Régime tenu</b> : mesure manuelle à un régime et une ouverture de papillon choisis (le papillon se règle pendant
+      la mesure) ; couple, puissance en kW et en ch affichés en direct. <i>Relâcher le frein</i> rend le moteur libre.</li>
+  <li><b>Options</b> : l'<b>estimation d'après les tables</b> (voir ci-dessous) et son rendement effectif ; <i>Garder comme
+      référence</i> fige la courbe en gris pour comparer après une modification (cartographie, injecteurs, VANOS,
+      altitude…) ; <i>Exporter CSV</i> enregistre les points mesurés et l'estimation.</li>
+  <li><b>Courbes</b> : couple (bleu, échelle de gauche) et puissance (rouge, à droite) mesurés, estimation en pointillés
+      verts, pertes au lever de pied en pointillés orange (tir), valeurs constructeur en losanges. Sous le graphique, le tableau des points : lambda, avance, air et durée
+      d'injection relevés pendant la mesure.</li>
+  <li><b>Résumé</b> : couple maxi et puissance maxi mesurés, comparés au constructeur ; après un tir, les pertes au
+      régime de puissance maxi. <i>Exporter CSV</i> y ajoute la courbe des pertes.</li>
+</ol>
+<p><b>Estimation d'après les tables.</b> Comme le calcul connu pour les diesels TDI (couple ∝ quantité injectée), on
+déduit le couple d'un moteur essence de la cartographie seule : à pleine charge, l'air par cylindre vient de la table
+alpha-N (colonne papillon maxi), l'essence brûlée est limitée par l'air (λ = 1, l'excès d'enrichissement ne donne
+rien), puis couple = 6 cylindres × essence brûlée × 43 MJ/kg × rendement effectif / 4π. Le rendement effectif
+(0,31 par défaut, ordinaire pour un moteur essence atmosphérique de cette époque) est réglable. L'avance et la durée
+d'injection des tables sont données pour information. C'est une estimation : l'air vient de la table alpha-N, qui est la valeur
+de repli du mode dégradé (débitmètre en panne), volontairement grossière : elle sous-estime le remplissage réel
+d'environ 7 % entre 2000 et 4500 tr/min. À 4000 tr/min l'estimation donne environ 80 % du couple mesuré au banc virtuel.</p>
+<p>Au banc virtuel, le M52B28 donne environ 290 N·m et 142 kW maxi à 20 °C (constructeur 280 N·m et 142 kW). Le moteur virtuel respire selon son propre
+modèle physique (papillon, vanne de ralenti, collecteur, renouvellement de la charge calculé avec le calage réel des arbres à cames) : modifier la cartographie change ce que le calculateur
+commande, pas la façon dont le moteur respire.</p>
+
+<h3 id="contact">Contact (+15), post-fonctionnement et EEPROM</h3>
+<p>Comme sur la voiture, couper le contact ne coupe pas tout de suite le calculateur : le firmware voit la tension tomber
+(état « contact coupé, extinction »), arrête injection et allumage, maintient le relais principal pendant le
+<b>post-fonctionnement</b> (6 s après un arrêt moteur), écrit dans son <b>EEPROM</b> ce qu'il doit garder (adaptations,
+mémoire des défauts, position de repos du VANOS…), puis relâche le relais : le calculateur s'éteint. La ligne
+<i>Etat</i> de l'onglet Moteur virtuel le montre (« contact coupé, post-fonctionnement », puis « calculateur éteint »).
+Remettre le contact rallume le calculateur : la RAM est perdue, le firmware relit l'EEPROM et refait l'échange EWS.
+Un défaut mémorisé avant la coupure est donc toujours là au redémarrage.</p>
+<p><b>EEPROM vierge par défaut</b> : à chaque chargement de full read, la 24C04 est vierge (tout à <code>FF</code>), comme une
+puce neuve. Menu <i>Fichier &gt; EEPROM simulée (24C04)</i> : <b>fichier de départ</b> (une EEPROM de 512 octets, lue par
+exemple sur un vrai calculateur, chargée à chaque full read sans être modifiée) ; <b>garder l'EEPROM de chaque full read</b>
+(un fichier par full read dans le dossier <i>eeprom</i> du simulateur, relu au chargement et enregistré dès que le firmware l'écrit) ;
+enregistrer sous un autre nom, charger une EEPROM maintenant, ou l'effacer. Un chargement ou un effacement prend effet à la
+remise du contact.</p>
+
+<h3 id="son">Son du moteur (menu Settings)</h3>
+<p>Le moteur virtuel s'entend : le son est synthétisé en direct à partir de ce que fait le moteur, pas d'un
+enregistrement. À chaque temps moteur (trois par tour, ordre 1-5-3-6-2-4), la bouffée de gaz du cylindre, d'autant plus
+forte que la combustion a été forte, passe dans un modèle de la ligne d'échappement : <b>collecteur 6-2</b> (six primaires de 32 mm et 0,60 m réunis en
+deux tubes de 63 mm et 3,5 m, un par banc 1-2-3 / 4-5-6), puis le <b>silencieux</b>, dont les chambres et chicanes étalent
+chaque bouffée et dont la laine absorbe les aigus : le son est plus rond. Un cylindre qui ne brûle pas ne donne qu'un
+souffle : on entend les ratés, le démarreur, le régime qui monte ou qui cale. Chaque bouffée a la forme d'une vidange
+réelle (pic de pression à l'ouverture de la soupape puis refoulement par le piston) : le ralenti reste bien présent, même
+sur un haut-parleur d'ordinateur. L'admission ajoute un grondement quand le papillon est ouvert.</p>
+<p><b>Démarreur</b> : grondement grave du moteur électrique (environ 11 tours d'induit par tour de vilebrequin, ≈ 75 Hz),
+qui ralentit à chaque compression (trois par tour). Une fois le moteur lancé, la roue libre du pignon décroche : le démarreur
+tourne seul à sa vitesse libre tant qu'on le garde. <b>Raté</b> : le cylindre qui ne brûle pas ne donne qu'un souffle sourd, on entend le trou dans
+le rythme.</p>
+<p><b>Pops au lever de pied</b> : en décélération, le calculateur coupe l'injection ; le carburant resté sur les parois
+continue d'arriver dans les cylindres sans brûler, avec de l'air. Si le collecteur est assez chaud (au moins 620 °C entre les
+gaz et la paroi), ce mélange s'enflamme par moments. La température de l'échappement est simulée par banc : gaz au collecteur (≈ 450 °C au
+ralenti, ≈ 850 °C à pleine charge, plus avec un allumage retardé) et paroi du collecteur, qui chauffe en une dizaine de
+secondes de charge et refroidit lentement. Échappement froid ou simples coups d'accélérateur : peu ou pas de pops ; après
+une montée en charge : quelques pops au lever de pied. Pas de pops à l'accélération : tous les cylindres brûlent, et l'oxygène d'un mélange un peu pauvre oxyde les imbrûlés
+sans bruit ; il faut une charge qui ne brûle pas (coupure d'injection au lever de pied ou au limiteur, raté). Le papillon suit la
+pédale comme par le câble (≈ 0,1 s pour toute la course), même si on déplace le curseur d'un coup.
+Les deux températures sont dans les Courbes.</p>
+<figure><img src="images/menu_settings.png" alt="Menu Settings"></figure>
+<p>Menu <b>Settings</b> : <b>Mute</b> coupe le son (le choix est gardé d'un lancement à l'autre) ; <i>Volume du moteur</i> ; <a href="#theme">Thème</a> ;
+<b>Échappement</b>. Le son suit le régime en temps réel ; en vitesse de simulation « Max », il reste joué au régime du moment.</p>
+<p><b>Settings &gt; Échappement</b> : trois sons, réglés d'après des enregistrements de 328i E36 (gardé d'un lancement à l'autre) :</p>
+<ul>
+  <li><b>Origine</b> (silencieux BMW) : grave et feutré, caisse grave marquée ;</li>
+  <li><b>X-pipe + silencieux race</b> (type Supersprint) : plus clair et plus rauque ;</li>
+  <li><b>Silencieux race</b> (type Eisenmann) : rond au ralenti, avec une forte variation d'un cycle à l'autre, s'ouvre vite
+      en montant en régime.</li>
+</ul>
+<p>Il n'y a <b>aucun bruit continu</b> (pas de souffle) : tout le son vient des bouffées des cylindres. Le grain vient de
+ce qui varie d'une bouffée à l'autre et de la ligne : la force de chaque combustion change un peu d'un cycle à l'autre,
+les fortes bouffées sont légèrement écrêtées (son rauque, sans écraser l'écart ralenti / pleine charge), et le tube de
+sortie a une résonance grave propre à chaque échappement.</p>
+<figure><img src="images/son_echappement.png" alt="Spectres des enregistrements et du simulateur, au ralenti et en montée en régime"></figure>
+<p>Sur la figure : la répartition de l'énergie par tiers d'octave (de 63 Hz à 1,6 kHz) des enregistrements (blanc) et
+du simulateur (bleu), au ralenti et en montée en régime. Les écarts restants viennent en partie des enregistrements :
+vidéos prises avec des micros et à des distances différentes, régime inconnu, bruit ambiant. Le niveau sonore de chaque
+échappement n'est pas mesurable sur ces vidéos : le X-pipe et le silencieux race sont réglés un peu plus fort (+2 et +3 dB).</p>
+
+<h3 id="manette">Manette (menu Settings)</h3>
+<figure><img src="images/manette.png" alt="Settings > Manette"></figure>
+<p>Menu <b>Settings &gt; Manette…</b> : les curseurs du moteur virtuel (papillon, régime imposé, températures, vitesse,
+charge, batterie, pression de clim) se pilotent avec les <b>axes</b> d'une manette, et les commandes (Démarrer, démarreur,
+couper le contact, contact, brancher le moteur, mode, cases d'options et pannes simulées) avec ses <b>boutons</b>. Toute
+manette reconnue par le système convient : manette Xbox, PlayStation ou Switch, manette générique, volant, pédalier.</p>
+<ol>
+  <li>Brancher la manette : elle apparaît en bas de la fenêtre avec ses axes (barres) et ses boutons (pastilles), en direct.</li>
+  <li>Choisir une commande dans la liste, cliquer <b>Assigner…</b>, puis bouger l'axe à fond ou appuyer sur le bouton (8 s).
+  La course de l'axe est apprise au premier mouvement : gâchette (repos en bas), stick (repos au centre), pédale.</li>
+  <li>Options de la commande choisie : <b>Inverser</b> ; <b>N'importe quelle manette</b> (sinon, seulement la manette utilisée à
+  l'affectation) ; pour un curseur, mode <b>Absolu</b> (la position de l'axe donne la valeur, ex. gâchette = papillon) ou
+  <b>Relatif</b> (le stick fait monter ou descendre la valeur, et elle reste quand on le lâche : pratique pour les températures
+  ou la vitesse), <b>Stick centré : course complète</b> (tout le débattement du stick au lieu d'un demi), vitesse en relatif et
+  zone morte. La jauge <i>Valeur</i> montre ce que produit l'axe.</li>
+</ol>
+<p><b>Configuration de base</b> (manette reconnue) : gâchette droite = papillon, gâchette gauche = charge extérieure, stick
+gauche haut/bas = vitesse du véhicule, stick droit haut/bas = régime imposé (relatif), Start = Démarrer, A = démarreur (tant
+qu'il est enfoncé), B = couper le contact, Select = contact, Y = clim. Les affectations sont gardées d'un lancement à l'autre ;
+la case <b>Piloter le moteur virtuel à la manette</b> suspend le pilotage sans les perdre. La souris reste utilisable : un
+curseur affecté en mode absolu ne bouge que lorsque l'axe bouge.</p>
+<p>La ligne d'état indique le pilote et le nombre de lectures par seconde (environ 100). Si une manette est vue mais que ses
+entrées ne bougent plus : <b>Relancer le pilote</b>. Sous Windows, la case <b>Mode compatibilité</b> lit les manettes par
+XInput (manettes Xbox) et DirectInput seulement, sans les entrées brutes : à essayer si la manette ne répond pas.</p>
+
+<h2 id="fenetres">Fenêtres séparées</h2>
+<div class="deux">
+<figure><img src="images/menu_fenetres.png" alt="Menu Fenêtres"><figcaption>Le menu Fenêtres.</figcaption></figure>
+<div>
+<p>Chaque onglet du bas peut s'ouvrir dans sa propre fenêtre :</p>
+<ul>
+  <li><b>double-clic</b> sur l'onglet, ou <b>clic droit</b> &gt; « Ouvrir dans une fenêtre séparée » ;</li>
+  <li>ou le menu <b>Fenêtres</b>, une case par onglet.</li>
+</ul>
+<p>L'onglet reste à sa place, marqué <b>↗</b>, avec les boutons « Afficher la fenêtre » et « Remettre ici ». Pour
+rattacher : fermer la fenêtre, ou « Remettre dans la fenêtre principale » en bas de celle-ci, ou
+« Tout remettre dans la fenêtre principale » dans le menu.</p>
+<p>Les fenêtres ouvertes et leur position sont <b>retrouvées au lancement suivant</b>, ainsi que la position de la
+fenêtre principale. Si un écran a été débranché, les fenêtres qui s'y trouvaient reviennent à une position par
+défaut. « Oublier les positions des fenêtres » remet tout à zéro.</p>
+</div>
+</div>
+<figure><img src="images/fenetre_separee.png" alt="Courbes dans une fenêtre séparée, à côté de la fenêtre principale">
+<figcaption>Les Courbes dans leur propre fenêtre, à côté de la fenêtre principale (sur l'écran, chaque fenêtre a bien sûr sa barre de titre).</figcaption></figure>
+
+<h2 id="ecutool">MS41 ECU Tool intégré (v1.1.5)</h2>
+<div class="deux">
+<figure><img src="images/ecu_tool.png" alt="MS41 ECU Tool, identification du calculateur simulé"></figure>
+<div>
+<p><i>Outils &gt; MS41 ECU Tool</i> (ou le bouton de l'onglet K-line) ouvre l'outil dans sa fenêtre, <b>déjà branché sur
+la ligne K du simulateur</b> : le port « Simulateur MS41 (USB) » est choisi automatiquement, à 9600 bauds.
+La simulation passe en temps réel ; il faut que Run soit lancé.</p>
+<p><b>Mode Fast</b> (boutons <i>Partial read fast</i>, <i>Full read fast</i>, <i>Read memory fast</i>, <i>Play fast</i>) :
+il fonctionne comme sur la voiture. L'outil déverrouille le calculateur par la commande <code>0x90</code> et son mot de
+passe, le firmware change lui-même le débit de son UART, et l'outil suit : 19 737, puis 28 800, puis 187 500 bauds.
+Une lecture partielle (24 Ko) prend environ 3 s au lieu de 46 s. Si les débits ne correspondent plus, les octets
+arrivent en erreur de trame, comme sur un vrai câble.
+Comme sur la voiture, le déverrouillage n'est possible que <b>moteur arrêté</b> et laisse le calculateur en
+<b>mode service</b> jusqu'à la coupure du contact : allumage et injection coupés, le moteur ne démarre plus. Couper puis
+remettre le contact (onglet Moteur virtuel) pour repartir.</p>
+<p>Tout fonctionne comme sur une voiture : identification (ci-contre : référence, ISN de l'antidémarrage… ; le numéro de châssis est masqué sur la capture),
+données en direct, défauts, adaptations, activations, lecture et écriture de la flash. Après une écriture,
+<i>Fichier &gt; Enregistrer la flash simulée</i> récupère le résultat dans un fichier.</p>
+<p>Comme sur la voiture, au-dessus de <b>2000 tr/min</b> le calculateur ignore une demande de dialogue K-line : il faut
+ouvrir la communication au ralenti (elle reste ensuite ouverte, jusqu'à 30 s sans échange).</p>
+</div>
+</div>
+
+<h2 id="menus">Menus et raccourcis</h2>
+<table>
+  <tr><th>Menu</th><th>Contenu</th></tr>
+  <tr><td>Fichier</td><td>Charger un full read (format détecté, ou forcé : lecture brute de la puce / vue CPU) ; charger ou retirer des
+      labels ; charger une définition RomRaider, choisir la rom de la définition ; enregistrer la flash simulée ;
+      EEPROM simulée (garder, enregistrer, charger, effacer) ; quitter.</td></tr>
+  <tr><td>Simulation</td><td>Reset, Step, Step over, Step out, exécuter jusqu'à la ligne, Run, Pause ; point d'arrêt sur la ligne ;
+      arrêter sur un trap matériel ; watchdog actif (reset si non servi).</td></tr>
+  <tr><td>Outils</td><td>Moteur : caractéristiques et réglages ; Banc de puissance ; EWS (antidémarrage) ; MS41 ECU Tool branché sur la ligne K du simulateur.</td></tr>
+  <tr><td>Fenêtres</td><td>Un onglet par case dans sa propre fenêtre ; tout remettre dans la fenêtre principale ; oublier les positions.</td></tr>
+  <tr><td>Settings</td><td>Mute (son du moteur coupé) ; volume du moteur ; échappement (origine, X-pipe + race, race) ; thème (sombre ou clair) ; Manette… (pilotage du moteur virtuel à la manette).</td></tr>
+  <tr><td>Aide</td><td>Ce guide (<kbd>F1</kbd>) ; À propos.</td></tr>
+</table>
+
+<h2 id="limites">Limites actuelles</h2>
+<ul>
+  <li><b>Satellite</b> : simulé en boîte noire d'après ce que le firmware attend (son programme n'a pas été lu). Les diagnostics
+      des 24 étages de sortie sont envoyés sans défaut.</li>
+  <li><b>Entrée du contact</b> : le firmware ne détecte la coupure qu'à la chute de la tension mesurée sur AN5 ; le simulateur
+      fait tomber cette tension avec le contact (le câblage exact reste à confirmer sur la carte).</li>
+  <li><b>Son</b> : synthèse réglée sur des enregistrements de 328i E36, à juger à l'oreille.</li>
+  <li><b>Couple et puissance maxi</b> : 93 à 99 % des valeurs constructeur pour B20, B25 et B28 (le remplissage est recalé sur les valeurs du B28 ; les B20 et B25 prennent la même forme de courbe, et leurs injecteurs 415 avec la cartographie du B28 donnent un mélange pauvre).</li>
+  <li><b>Papillon</b> : grand ouvert, le firmware lit environ 85 % avec le potentiomètre d'origine du simulateur
+      (0,66-4,35 V) ; l'échelle ou la course réelle du capteur restent à vérifier sur la voiture.</li>
+  <li><b>Capteurs modèles</b> : le capteur de vilebrequin inductif (amplitude, seuil), la limite de cliquetis du moteur et le
+      traitement interne du satellite ne sont pas mesurés sur une voiture.</li>
+  <li><b>Indépendance vis-à-vis du logiciel</b> : le matériel simulé (moteur, capteurs, satellite, EWS) ne lit rien dans la RAM ni dans la
+      calibration du calculateur. Seuls certains affichages (valeurs lues par le firmware, diagnostic en clair, estimation d'après les
+      tables) supposent les adresses de l'ID41.</li>
+</ul>
+</main>
+</div>
+<div id="zoom" onclick="this.style.display='none'"><img alt=""></div>
+<script>
+  document.querySelectorAll('figure img').forEach(function (img) {
+    img.addEventListener('click', function () {
+      var z = document.getElementById('zoom');
+      z.querySelector('img').src = img.src;
+      z.style.display = 'flex';
+    });
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.getElementById('zoom').style.display = 'none'; });
+</script>
+</body>
+</html>
