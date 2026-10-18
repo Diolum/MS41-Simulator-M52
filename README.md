@@ -192,7 +192,7 @@ l'utilisateur charge.
 Le simulateur est gratuit. S'il vous est utile et que vous voulez soutenir le travail de rétro-ingénierie, de
 documentation et de développement qu'il représente, un don est possible par PayPal :
 
-**[Faire un don avec PayPal](https://www.paypal.com/qrcodes/p2pqrc/8T3B5EBD83SLY)**
+**[Faire un don avec PayPal]([https://paypal.me/DorianCaille)**
 
 Merci !
 
