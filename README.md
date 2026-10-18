@@ -140,6 +140,9 @@ Créés à l'usage à côté du jar : `docs/definitions/` (à créer soi-même, 
 ## Remarques
 
 - Le code source n'est pas publié : seul l'exécutable est distribué.
+- Menu **Mode Interface** : *extra simple* (moteur virtuel, courbes, chronogrammes, K-line seulement : pour jouer avec
+  le moteur), *simple* (sans désassemblage, pseudocode ni graphe), *normal* (sans pseudocode ni graphe) ou *avancé*
+  (logiciel complet).
 - Les réglages (fenêtres, thème sombre ou clair, son, manette, capteurs) sont gardés d'un lancement à l'autre.
 - Les cartographies européennes (MS41.0) et américaines (MS41.1 / MS41.2, avec air secondaire) sont acceptées.
 - Limites connues : voir le chapitre *Limites actuelles* du guide.

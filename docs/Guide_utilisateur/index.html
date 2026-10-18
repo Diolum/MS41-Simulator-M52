@@ -73,6 +73,7 @@
   <a href="#presentation">Présentation</a>
   <a href="#rapide">Démarrage rapide</a>
   <a href="#fenetre">La fenêtre principale</a>
+  <a class="sous" href="#modes">Modes d'interface</a>
   <a class="sous" href="#theme">Apparence</a>
   <a href="#execution">Exécuter le firmware</a>
   <a class="sous" href="#desassemblage">Désassemblage</a>
@@ -170,6 +171,21 @@ branché sur ses broches et une ligne K pour les outils de diagnostic.</p>
   <li><b>Onglets du bas</b> : chacun peut s'ouvrir dans sa propre fenêtre (double-clic sur l'onglet).</li>
   <li><b>Barre d'état</b> : fichier chargé, format (brut / vue CPU), référence et index de la calibration.</li>
 </ol>
+
+<h3 id="modes">Modes d'interface</h3>
+<p>Menu <b>Mode Interface</b> : quatre niveaux, du plus simple au logiciel complet. Le choix est gardé d'un lancement à
+l'autre ; la simulation continue pendant le changement.</p>
+<ul>
+  <li><b>Extra simple</b> : pour jouer avec le moteur. Seulement les onglets <i>Moteur virtuel</i>, <i>Chronogrammes</i>,
+      <i>Courbes</i> et <i>K-line</i>, qui prennent toute la fenêtre ; ni désassemblage, ni registres, ni broches, ni
+      boutons de pas à pas.</li>
+  <li><b>Simple</b> : sans désassemblage, pseudocode ni graphe (ni mémoire CPU, symboles, accès bus, points d'arrêt,
+      interruptions) ; on garde l'état des broches, le matériel, les capteurs, les tables, le CAN, l'EWS et le journal.</li>
+  <li><b>Normal</b> : tout sauf le pseudocode et le graphe.</li>
+  <li><b>Avancé</b> : le logiciel complet (mode par défaut).</li>
+</ul>
+<p>Un onglet masqué ouvert dans une fenêtre séparée est remis dans la fenêtre principale ; le menu <b>Fenêtres</b> ne
+liste que les onglets montrés.</p>
 
 <h3 id="theme">Apparence : thème sombre ou clair</h3>
 <p>Par défaut, le simulateur a l'apparence de <b>MS41 ECU Tool</b> : fond sombre, panneaux en cartes arrondies dont le
@@ -518,7 +534,10 @@ vanne de ralenti se fermer, puis la coupure d'injection en décélération (lamb
 <figure><img src="images/pseudocode.png" alt="Onglet Pseudocode : FaultDetection_MasterDispatcher structuree, avec niveaux de confiance"></figure>
 <p>L'onglet <b>Pseudocode</b> traduit une fonction du firmware en pseudo-C, ligne par ligne, avec l'instruction d'origine à
 droite. Il est produit par le désassembleur du simulateur (pas par IDA). Saisir une adresse ou un label, ou utiliser
-<b>Fonction du PC</b> (la fonction en cours d'exécution) ou <b>Ligne du désassemblage</b> (la ligne sélectionnée en haut) ;
+<b>Fonction du PC</b> (la fonction en cours d'exécution) ou <b>Ligne du désassemblage</b> (la ligne sélectionnée en haut),
+ou cliquer dans la <b>liste des fonctions</b> à gauche (filtre par nom ou adresse) : fonctions du fichier de labels et
+toutes les cibles d'appel trouvées dans le code (la liste existe aussi sans labels, avec des noms <code>sub_xxxxx</code>) ;
+la case <b>Assembleur</b> montre ou masque la colonne des instructions ;
 le début de la fonction vient des bornes du fichier de labels ; sans elles, il est deviné (après le retour qui précède) et
 c'est indiqué. <b>Double-clic</b> sur une
 ligne : l'instruction dans le désassemblage. À l'arrêt, la ligne du PC est surlignée.</p>
@@ -549,7 +568,7 @@ d'instructions sans saut), relié à ses successeurs. Flèche <b>verte</b> : sau
 continue à l'instruction suivante) ; <b>bleue</b> : passage sans condition. Les flèches de boucle (retour vers un bloc
 plus haut) passent à droite des blocs. Le bloc d'entrée est encadré en bleu, celui du PC en vert, l'instruction du PC
 surlignée. Contenu des blocs : <b>Assembleur</b> ou <b>Pseudocode</b> (choix dans la barre). Même choix de fonction que
-dans l'onglet Pseudocode, plus <b>Précédente</b>. <b>Molette</b> : zoom autour de la souris ; <b>glisser</b> : déplacer ;
+dans l'onglet Pseudocode (dont la liste des fonctions à gauche), plus <b>Précédente</b>. <b>Molette</b> : zoom autour de la souris ; <b>glisser</b> : déplacer ;
 <b>Ajuster</b> : toute la fonction à l'écran ; <b>double-clic</b> sur un appel (en bleu) : graphe de la fonction appelée ;
 double-clic sur une autre ligne : l'instruction dans le désassemblage. Les blocs sont rangés en couches (plus long
 chemin depuis l'entrée) et placés pour limiter les croisements.</p>
@@ -897,6 +916,7 @@ ouvrir la communication au ralenti (elle reste ensuite ouverte, jusqu'à 30 s sa
   <tr><td>Outils</td><td>Moteur : caractéristiques et réglages ; Banc de puissance ; EWS (antidémarrage) ; MS41 ECU Tool branché sur la ligne K du simulateur.</td></tr>
   <tr><td>Fenêtres</td><td>Un onglet par case dans sa propre fenêtre ; tout remettre dans la fenêtre principale ; oublier les positions.</td></tr>
   <tr><td>Settings</td><td>Mute (son du moteur coupé) ; volume du moteur ; échappement (origine, X-pipe + race, race) ; thème (sombre ou clair) ; Manette… (pilotage du moteur virtuel à la manette).</td></tr>
+  <tr><td>Mode Interface</td><td>Extra simple, simple, normal ou avancé : onglets et vues montrés (voir <a href="#modes">Modes d'interface</a>).</td></tr>
   <tr><td>Aide</td><td>Ce guide (<kbd>F1</kbd>) ; À propos.</td></tr>
 </table>
 
