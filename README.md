@@ -20,6 +20,8 @@ firmware lui-même qui tourne et pilote le moteur virtuel, comme dans la voiture
 - **Observer les signaux** : chronogrammes des broches, courbes des capteurs et des valeurs du firmware.
 - **Dialoguer en K-line** avec **MS41 ECU Tool v1.1.5**, intégré : identification, codes défaut, lecture et écriture
   de la flash.
+- **Brancher Claude** (serveur MCP intégré, *Settings > Serveur MCP*) : un assistant lit l'état du simulateur (moteur,
+  mémoire, tables, courbes, désassemblage), en lecture seule et sur l'ordinateur seulement.
 
 ## Aperçu
 
@@ -50,6 +52,12 @@ Avec une définition RomRaider, chaque table de la calibration s'affiche ; les c
 surlignées en direct.
 
 ![Tables](docs/Guide_utilisateur/images/tables.png)
+
+Un point bleu montre la position exacte du calculateur dans la table (valeur d'entrée lue dans le registre que le
+firmware compare aux points de l'axe). Vue 3D facultative (tables 3D) : la surface en relief, à faire tourner à la
+souris, avec une flèche qui descend sur ce point.
+
+![Vue 3D d'une table](docs/Guide_utilisateur/images/tables_3d.png)
 
 ### Désassemblage, pseudocode et graphe
 

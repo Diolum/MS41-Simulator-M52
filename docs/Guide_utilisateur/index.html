@@ -111,6 +111,7 @@
   <a class="sous" href="#contact">Contact, EEPROM</a>
   <a class="sous" href="#son">Son du moteur</a>
   <a class="sous" href="#manette">Manette</a>
+  <a class="sous" href="#mcp">Serveur MCP (Claude)</a>
   <a href="#fenetres">Fenêtres séparées</a>
   <a href="#ecutool">MS41 ECU Tool intégré</a>
   <a href="#menus">Menus et raccourcis</a>
@@ -188,6 +189,13 @@ l'autre ; la simulation continue pendant le changement.</p>
 liste que les onglets montrés. <b>Vitesse</b> : au lancement, la simulation est en <i>temps réel</i> ; dans les modes
 <i>extra simple</i> et <i>simple</i>, elle est toujours en temps réel et le sélecteur de vitesse est masqué ; dans les
 modes <i>normal</i> et <i>avancé</i>, le sélecteur reste disponible (max, 1/10, 1/100, 1/1000).</p>
+<p><b>Ressources</b> : ce qui n'est pas affiché ne travaille pas. Un onglet caché (autre onglet choisi, ou retiré par le
+mode d'interface) ne se redessine pas et ne se met pas à jour ; il se remet à jour dès qu'il réapparaît. Le suivi des
+cellules lues (onglet <i>Tables</i>), l'activité des boîtiers (<i>Matériel</i>, <i>Mémoire CPU</i>) et le journal des
+accès (<i>Accès bus</i>) ne surveillent la mémoire que pendant que leur onglet (ou sa fenêtre séparée) est affiché :
+sans eux, les accès mémoire du programme ne coûtent rien de plus. Les <i>Courbes</i> et les <i>Chronogrammes</i>, eux,
+<b>enregistrent toujours</b>, même cachés : en revenant dessus, on retrouve ce qui s'est passé entre-temps. Les lignes
+de la <i>K-line</i> attendent aussi et s'affichent au retour.</p>
 
 <h3 id="theme">Apparence : thème sombre ou clair</h3>
 <p>Par défaut, le simulateur a l'apparence de <b>MS41 ECU Tool</b> : fond sombre, panneaux en cartes arrondies dont le
@@ -422,8 +430,24 @@ conservés).</p>
       on voit le point de fonctionnement se déplacer quand le régime ou la charge changent. <b>Valeurs brutes</b> affiche
       les octets au lieu des valeurs converties.</li>
   <li>Sous la table, la description (rôle, routine du firmware qui la lit).</li>
+  <li><b>Point bleu</b> (tables 2D et 3D) : la position <b>exacte</b> où le firmware se trouve, qui se déplace
+      entre les lignes (et entre les colonnes en 3D). Sous le titre : la valeur d'entrée du firmware dans les unités de
+      chaque axe (par exemple <i>Battery Voltage = 14.1 Volts</i>) et la valeur de la table interpolée linéairement à cet
+      endroit. D'où vient cette position : pour trouver son intervalle, le firmware compare sa valeur d'entrée, dans un
+      registre, aux points de l'axe (instruction <code>CMP</code> / <code>CMPB</code> qui lit l'axe en mémoire). Le CPU
+      simulé lit ce registre au moment de la comparaison : aucune analyse du programme, aucun label, seulement ce que fait
+      l'instruction. C'est la valeur du firmware (régime mesuré, tension convertie...), qui peut différer un peu de la
+      valeur physique du moteur virtuel. Point gris : pas de nouvelle comparaison depuis 0,5 s ; plus de point après 2 s.</li>
+  <li><b>Vue 3D</b> (tables 3D seulement, désactivée par défaut) : la table en relief à côté de la grille, avec ses
+      trois axes gradués et leurs noms dans le cartouche en haut à gauche. <b>Glisser</b> : la faire tourner ;
+      <b>molette</b> : zoom ; <b>double-clic</b> : vue de départ. Les cellules lues par le CPU sont marquées en orange et une
+      <b>flèche verticale descend sur la surface</b> au point exact (même position que le point bleu), avec les valeurs
+      d'entrée des deux axes. Si les axes n'ont pas été comparés (table lue autrement), elle vise le centre des cellules lues
+      ensemble (en général un carré de 2 × 2). Une lecture de toute la table (contrôle de la flash) ne la fait pas bouger.</li>
   <li><b>Ouvrir dans une fenêtre</b> (ou double-clic sur la table) : la table dans sa propre fenêtre, pour en suivre plusieurs à la fois.</li>
 </ul>
+
+<figure><img src="images/tables_3d.png" alt="Vue 3D de la table d'injection de base, fleche sur les cellules lues au ralenti"></figure>
 
 <h3 id="moteur">Moteur virtuel</h3>
 <figure><img src="images/moteur_virtuel.png" alt="Onglet Moteur virtuel"></figure>
@@ -567,8 +591,13 @@ les conditions ne comptent plus comme lignes).</p>
 <figure><img src="images/graphe.png" alt="Onglet Graphe : graphe de flot de la boucle principale, bloc du PC surligne"></figure>
 <p>L'onglet <b>Graphe</b> montre une fonction comme la vue graphe d'IDA : un rectangle par bloc de base (suite
 d'instructions sans saut), relié à ses successeurs. Flèche <b>verte</b> : saut pris ; <b>rouge</b> : saut non pris (on
-continue à l'instruction suivante) ; <b>bleue</b> : passage sans condition. Les flèches de boucle (retour vers un bloc
-plus haut) passent à droite des blocs. Le bloc d'entrée est encadré en bleu, celui du PC en vert, l'instruction du PC
+continue à l'instruction suivante) ; <b>bleue</b> : passage sans condition. L'instruction responsable du saut est surlignée dans son bloc : en <b>vert</b> pour un saut
+conditionnel (la flèche verte va là où elle saute, la rouge est le cas où elle ne saute pas ; en pseudocode, c'est la
+ligne <code>if (…)</code> : vert = condition vraie), en <b>bleu</b> pour un saut sans condition. Les sorties sont
+rangées dans l'ordre de leurs cibles, pour que les flèches verte et rouge ne se croisent pas. Les flèches de boucle
+(retour vers un bloc plus haut) partent du coin droit du bloc et remontent juste à sa droite, dans un couloir libre :
+une boucle sur soi-même reste collée à son bloc. Une flèche qui saute plusieurs couches descend en ligne droite
+(alignée sur son bloc d'arrivée quand la place le permet), avec une courbe seulement entre deux couches. Les flèches sont dessinées par-dessus les blocs, jamais cachées. Le bloc d'entrée est encadré en bleu, celui du PC en vert, l'instruction du PC
 surlignée. Contenu des blocs : <b>Assembleur</b> ou <b>Pseudocode</b> (choix dans la barre). Même choix de fonction que
 dans l'onglet Pseudocode (dont la liste des fonctions à gauche), plus <b>Précédente</b>. <b>Molette</b> : zoom autour de la souris ; <b>glisser</b> : déplacer ;
 <b>Ajuster</b> : toute la fonction à l'écran ; <b>double-clic</b> sur un appel (en bleu) : graphe de la fonction appelée ;
@@ -611,6 +640,10 @@ adresse, zone, valeur, symbole. Les registres R0-R15, la pile et la lecture du c
       <i>Circulaire</i> garde les derniers accès ; <i>Arrêt quand plein</i> garde les premiers après <b>Effacer</b> et l'indique (« TAMPON PLEIN »).</li>
   <li><b>Compteurs</b> : lignes affichées, remplissage du tampon, accès retenus, accès par seconde, et sur la deuxième ligne
       <b>tous</b> les accès vus par zone, filtrés ou non. Ils continuent pendant l'exécution, même tampon plein.</li>
+  <li><b>Onglet caché</b> : avec les réglages de départ (zones par défaut, lectures et écritures, toutes les adresses,
+      circulaire), le journal ne capture et ne compte que pendant qu'il est affiché ; le tampon se remplit de nouveau en
+      quelques millisecondes au retour. Dès qu'une capture est réglée (filtre de zone, de sens ou d'adresses, ou
+      <i>Arrêt quand plein</i>), elle continue même onglet caché, pour ne pas manquer un accès rare.</li>
   <li><b>Suivre en direct</b> : la liste se met à jour 4 fois par seconde pendant l'exécution ; décoché, seuls les compteurs bougent
       et la liste est mise à jour à la pause.</li>
   <li><b>Double-clic</b> : dans la colonne <i>Instr.</i>, va au code ; ailleurs, montre la donnée.</li>
@@ -863,6 +896,25 @@ curseur affecté en mode absolu ne bouge que lorsque l'axe bouge.</p>
 <p>La ligne d'état indique le pilote et le nombre de lectures par seconde (environ 100). Si une manette est vue mais que ses
 entrées ne bougent plus : <b>Relancer le pilote</b>. Sous Windows, la case <b>Mode compatibilité</b> lit les manettes par
 XInput (manettes Xbox) et DirectInput seulement, sans les entrées brutes : à essayer si la manette ne répond pas.</p>
+
+<h3 id="mcp">Serveur MCP pour Claude (menu Settings)</h3>
+<p><b>Settings &gt; Serveur MCP (Claude)…</b> : un assistant comme Claude (Claude Code, Claude Desktop) peut se connecter
+au simulateur par le protocole MCP et lire son état. Désactivé par défaut ; une fois coché, le choix est gardé d'un
+lancement à l'autre. Le serveur n'écoute que sur cet ordinateur (<code>127.0.0.1</code>, port 41041 par défaut) et
+refuse les pages web d'autres sites. <b>Première étape : lecture seule</b>, l'assistant ne modifie rien.</p>
+<ul>
+  <li><b>Outils</b> : <code>sim_status</code> (firmware, exécution, temps simulé), <code>engine_state</code> (moteur
+      virtuel), <code>read_memory</code> (mémoire vue par le CPU), <code>list_tables</code> et <code>read_table</code>
+      (valeurs, cellules lues, position exacte du firmware), <code>list_curve_channels</code> et <code>read_curves</code>
+      (historique des courbes), <code>disassemble</code>. Aucun nom de fichier n'est transmis.</li>
+  <li><b>Claude Code</b> : <code>claude mcp add --transport http ms41-simulator http://127.0.0.1:41041/mcp</code>
+      (ajouter <code>--scope user</code> pour tous les projets), puis <code>claude mcp list</code>.</li>
+  <li><b>Claude Desktop</b> : dans <code>claude_desktop_config.json</code>, lancer le pont fourni dans le jar
+      (<code>java -cp MS41Simulator.jar fr.diolum.ms41sim.mcp.StdioBridge 41041</code>) ; la fenêtre donne le texte
+      exact à copier avec le chemin du jar (bouton <i>Copier les réglages</i>).</li>
+  <li>La fenêtre montre l'adresse, le nombre d'appels d'outils, le client connecté et le dernier outil appelé.
+      Le simulateur doit être lancé, serveur activé, pour que l'assistant le trouve.</li>
+</ul>
 
 <h2 id="fenetres">Fenêtres séparées</h2>
 <div class="deux">
