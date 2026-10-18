@@ -128,13 +128,22 @@ branché sur ses broches et une ligne K pour les outils de diagnostic.</p>
 <ul>
   <li>suivre le firmware pas à pas (désassemblage, registres, mémoire, points d'arrêt) ;</li>
   <li>voir en direct quelles cellules des tables de calibration (définition RomRaider) le calculateur lit ;</li>
-  <li>faire tourner un moteur M52 virtuel (B20, B25 ou B28) : démarrage, ralenti régulé, accélérations, pannes de capteurs ;</li>
+  <li>faire tourner un moteur M52 ou S52 virtuel (B20, B25, B28 ou S52B32 de M3 US) : démarrage, ralenti régulé, accélérations, pannes de capteurs ;</li>
   <li>l'entendre (son synthétisé, pops au lever de pied), couper et remettre le contact comme sur la voiture ;</li>
   <li>le passer au <b>banc de puissance</b> : courbes de couple et de puissance mesurées au frein, comparées à une estimation tirée des tables ;</li>
   <li>observer les signaux sur les broches (chronogrammes) et l'évolution des capteurs dans le temps (courbes) ;</li>
   <li>dialoguer en K-line avec le calculateur simulé, directement ou avec <b>MS41 ECU Tool</b> intégré (identification, défauts, lecture et écriture de la flash).</li>
 </ul>
 <p>Un clic sur une image l'agrandit. Les numéros rouges des captures renvoient aux listes sous chaque image.</p>
+
+<div class="note"><p><b>À propos.</b> Aucun logiciel, document ni code BMW n'est fourni avec le simulateur : c'est une
+<b>émulation matérielle</b> de la carte (processeur, mémoires, décodeur d'adresse, périphériques) et d'un moteur virtuel
+branché sur ses broches. <b>Chacun fournit ses propres fichiers</b> : le full read de son calculateur (binaire) et, s'il le
+souhaite, ses labels et sa définition RomRaider. Le projet est du <b>vibe codage</b> (code écrit avec une IA, Claude),
+appuyé sur un gros travail de documentation et de rétro-ingénierie fait en amont, pendant et après : schéma de la carte
+reconstruit, équations du décodeur mesurées, datasheets, essais comparés au vrai matériel. Licence
+<b>CC BY-NC-ND 4.0</b> : utilisation et partage tels quels, sans usage commercial ni modification (fichier
+<code>LICENSE</code>).</p></div>
 
 <h2 id="rapide">Démarrage rapide</h2>
 <ol class="etapes">
@@ -301,7 +310,7 @@ instruction par instruction.</p>
   <li><b>Pas émulé</b> : durées de programmation et d'effacement (instantanées), endurance. Boîtier et numéros de broche
       non relevés sur la carte (signaux seulement).</li>
   <li><b>Programmer la flash</b> : comme sur la voiture, par la K-line avec <a href="#ecutool">MS41 ECU Tool</a>, ou
-      directement dans la vue (double-clic, <i>Charger…</i>). <i>Fichier &gt; Enregistrer la flash simulée</i> récupère le
+      directement dans la vue (double-clic, <i>Charger…</i>). <i>Fichier &gt; Enregistrer le binaire modifié…</i> récupère le
       résultat dans un fichier.</li>
 </ul>
 
@@ -897,23 +906,43 @@ curseur affecté en mode absolu ne bouge que lorsque l'axe bouge.</p>
 entrées ne bougent plus : <b>Relancer le pilote</b>. Sous Windows, la case <b>Mode compatibilité</b> lit les manettes par
 XInput (manettes Xbox) et DirectInput seulement, sans les entrées brutes : à essayer si la manette ne répond pas.</p>
 
-<h3 id="mcp">Serveur MCP pour Claude (menu Settings)</h3>
-<p><b>Settings &gt; Serveur MCP (Claude)…</b> : un assistant comme Claude (Claude Code, Claude Desktop) peut se connecter
-au simulateur par le protocole MCP et lire son état. Désactivé par défaut ; une fois coché, le choix est gardé d'un
-lancement à l'autre. Le serveur n'écoute que sur cet ordinateur (<code>127.0.0.1</code>, port 41041 par défaut) et
-refuse les pages web d'autres sites. <b>Première étape : lecture seule</b>, l'assistant ne modifie rien.</p>
+<h3 id="mcp">Serveur MCP pour Claude (menu Settings, expérimental)</h3>
+<p><b>Fonction expérimentale.</b></p>
+<p><b>Settings &gt; Serveur MCP (Claude)…</b> : un assistant comme Claude (Claude Code, Claude Desktop) se connecte au
+simulateur par le protocole MCP, lit tout son état et peut le piloter comme à la souris. Désactivé par défaut ; une fois
+coché, le choix est gardé d'un lancement à l'autre. Le serveur n'écoute que sur cet ordinateur (<code>127.0.0.1</code>,
+port 41041 par défaut) et refuse les pages web d'autres sites. <b>Autoriser le pilotage</b> (coché par défaut) : décoché,
+l'assistant ne peut plus que lire. Chaque action de pilotage est notée au <i>Journal</i>.</p>
 <ul>
-  <li><b>Outils</b> : <code>sim_status</code> (firmware, exécution, temps simulé), <code>engine_state</code> (moteur
-      virtuel), <code>read_memory</code> (mémoire vue par le CPU), <code>list_tables</code> et <code>read_table</code>
-      (valeurs, cellules lues, position exacte du firmware), <code>list_curve_channels</code> et <code>read_curves</code>
-      (historique des courbes), <code>disassemble</code>. Aucun nom de fichier n'est transmis.</li>
+  <li><b>Lecture</b> : <code>sim_status</code> (fichier chargé : nom, format, référence, indice logiciel, empreinte du
+      programme, flash modifiée ; définition et labels ; exécution), <code>engine_state</code> et <code>engine_panel</code>
+      (moteur virtuel, toutes les valeurs du panneau dont les défauts actifs), <code>cpu_state</code> (PC et fonction en
+      cours, registres), <code>bus_activity</code> (adresses lues et écrites pendant un moment, avec l'instruction qui
+      accède), <code>read_memory</code>, <code>list_tables</code> / <code>read_table</code> (valeurs, cellules lues, position
+      exacte du firmware), <code>list_curve_channels</code> / <code>read_curves</code>, <code>disassemble</code>,
+      <code>list_controls</code>, <code>dyno_status</code>, <code>read_gal</code>, <code>read_sensors</code>,
+      <code>list_breakpoints</code>.</li>
+  <li><b>Pilotage</b> : <code>set_control</code> (tous les curseurs, cases et boutons du panneau Moteur virtuel : papillon,
+      températures, batterie…, <b>pannes simulées</b>, cliquetis provoqué, Démarrer, démarreur maintenu… ; l'interface
+      suit), <code>engine_setting</code> (mode du moteur, octane, moteur simulé, démarrage automatique),
+      <code>sim_control</code> (run, pause, reset, pas à pas, jusqu'à une adresse, vitesse, mode d'interface, onglet
+      affiché), <code>write_memory</code> (RAM et SFR comme une écriture du CPU ; flash : contenu de la puce),
+      <code>write_table</code> (cellule de calibration, valeur convertie ou brute), <code>program_gal</code> (équations du
+      PLCC, ou celles d'origine), <code>set_sensor</code> (courbes des sondes, loi du papillon, couronne, impulsions de
+      vitesse), <code>dyno</code> (banc : régime tenu, balayage, tir, arrêt), <code>breakpoint</code>,
+      <code>export_curves</code> (tout l'historique des courbes en CSV dans le dossier <code>logs</code>),
+      <code>save_firmware</code> (binaire modifié enregistré à côté de l'original, nom d'origine + <code>_modifie</code>,
+      jamais d'écrasement).</li>
+  <li><b>Compétence Claude</b> : <code>docs/claude/ms41-simulator/SKILL.md</code> explique à Claude comment se servir
+      du simulateur (outils, démarrage, pannes, banc, précautions) ; à ajouter dans les compétences de Claude.</li>
   <li><b>Claude Code</b> : <code>claude mcp add --transport http ms41-simulator http://127.0.0.1:41041/mcp</code>
       (ajouter <code>--scope user</code> pour tous les projets), puis <code>claude mcp list</code>.</li>
   <li><b>Claude Desktop</b> : dans <code>claude_desktop_config.json</code>, lancer le pont fourni dans le jar
       (<code>java -cp MS41Simulator.jar fr.diolum.ms41sim.mcp.StdioBridge 41041</code>) ; la fenêtre donne le texte
       exact à copier avec le chemin du jar (bouton <i>Copier les réglages</i>).</li>
-  <li>La fenêtre montre l'adresse, le nombre d'appels d'outils, le client connecté et le dernier outil appelé.
-      Le simulateur doit être lancé, serveur activé, pour que l'assistant le trouve.</li>
+  <li>En mode d'interface <i>simple</i> ou <i>extra simple</i>, la vitesse reste en temps réel, comme à la souris. Les
+      changements de capteurs et de moteur simulé faits par l'assistant ne sont pas recopiés dans les fenêtres
+      <i>Capteurs</i> et <i>Moteur</i> déjà ouvertes (à rouvrir).</li>
 </ul>
 
 <h2 id="fenetres">Fenêtres séparées</h2>
@@ -953,7 +982,7 @@ Comme sur la voiture, le déverrouillage n'est possible que <b>moteur arrêté</
 remettre le contact (onglet Moteur virtuel) pour repartir.</p>
 <p>Tout fonctionne comme sur une voiture : identification (ci-contre : référence, ISN de l'antidémarrage… ; le numéro de châssis est masqué sur la capture),
 données en direct, défauts, adaptations, activations, lecture et écriture de la flash. Après une écriture,
-<i>Fichier &gt; Enregistrer la flash simulée</i> récupère le résultat dans un fichier.</p>
+<i>Fichier &gt; Enregistrer le binaire modifié…</i> récupère le résultat dans un fichier.</p>
 <p>Comme sur la voiture, au-dessus de <b>2000 tr/min</b> le calculateur ignore une demande de dialogue K-line : il faut
 ouvrir la communication au ralenti (elle reste ensuite ouverte, jusqu'à 30 s sans échange).</p>
 </div>
@@ -963,7 +992,7 @@ ouvrir la communication au ralenti (elle reste ensuite ouverte, jusqu'à 30 s sa
 <table>
   <tr><th>Menu</th><th>Contenu</th></tr>
   <tr><td>Fichier</td><td>Charger un full read (format détecté, ou forcé : lecture brute de la puce / vue CPU) ; charger ou retirer des
-      labels ; charger une définition RomRaider, choisir la rom de la définition ; enregistrer la flash simulée ;
+      labels ; charger une définition RomRaider, choisir la rom de la définition ; enregistrer le binaire modifié (au format du fichier chargé, ou au choix, sans jamais écraser l'original) ;
       EEPROM simulée (garder, enregistrer, charger, effacer) ; quitter.</td></tr>
   <tr><td>Simulation</td><td>Reset, Step, Step over, Step out, exécuter jusqu'à la ligne, Run, Pause ; point d'arrêt sur la ligne ;
       arrêter sur un trap matériel ; watchdog actif (reset si non servi).</td></tr>

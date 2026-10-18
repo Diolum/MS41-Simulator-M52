@@ -8,6 +8,11 @@ firmware lui-même qui tourne et pilote le moteur virtuel, comme dans la voiture
 
 ![Fenêtre principale](docs/Guide_utilisateur/images/fenetre_principale.png)
 
+> **Aucun logiciel, document ni code BMW n'est inclus.** Le simulateur est une **émulation matérielle** de la carte
+> (processeur, mémoires, décodeur d'adresse, périphériques, moteur virtuel branché sur les broches). Pour s'en servir,
+> **chacun fournit ses propres fichiers** : le full read de son calculateur (binaire), et s'il le souhaite ses labels
+> et sa définition RomRaider.
+
 ## Ce que l'on peut faire
 
 - **Suivre le firmware pas à pas** : désassemblage, registres, mémoire telle que le CPU la voit, points d'arrêt,
@@ -20,8 +25,10 @@ firmware lui-même qui tourne et pilote le moteur virtuel, comme dans la voiture
 - **Observer les signaux** : chronogrammes des broches, courbes des capteurs et des valeurs du firmware.
 - **Dialoguer en K-line** avec **MS41 ECU Tool v1.1.5**, intégré : identification, codes défaut, lecture et écriture
   de la flash.
-- **Brancher Claude** (serveur MCP intégré, *Settings > Serveur MCP*) : un assistant lit l'état du simulateur (moteur,
-  mémoire, tables, courbes, désassemblage), en lecture seule et sur l'ordinateur seulement.
+- **Brancher Claude** (serveur MCP intégré, *Settings > Serveur MCP*, **expérimental**) : un assistant lit tout l'état du simulateur
+  (fichier, CPU et adresses en cours, mémoire, tables, courbes, banc) et le pilote : curseurs, pannes simulées,
+  exécution, mémoire et flash, équations du PLCC, capteurs, passage au banc, export des courbes. Sur l'ordinateur
+  seulement ; pilotage désactivable.
 
 ## Aperçu
 
@@ -107,12 +114,24 @@ pied), avec trois échappements : origine, X-pipe + silencieux race, silencieux 
 
 ![Comparaison des spectres](docs/Guide_utilisateur/images/son_echappement.png)
 
+### Connexion MCP pour Claude (expérimental)
+
+Un serveur MCP intégré permet à un client MCP comme Claude (Claude Code, Claude Desktop) de lire l'état du simulateur
+et de le piloter : fichier chargé, CPU et adresses en cours, mémoire, tables avec la position exacte du firmware,
+courbes, curseurs et pannes simulées, exécution, écriture de la mémoire et de la flash, équations du PLCC, capteurs,
+passage au banc, export des courbes, enregistrement du binaire modifié. Désactivé par défaut, sur l'ordinateur
+seulement (`127.0.0.1`), pilotage désactivable, chaque action notée au Journal. **Fonction expérimentale** : à
+utiliser en connaissance de cause. Réglages à copier dans *Settings > Serveur MCP*. Une compétence Claude prête à
+l'emploi est fournie dans `docs/claude/ms41-simulator/SKILL.md`.
+
 ## Prérequis
 
 - **Java 8 ou plus récent** (par exemple [Eclipse Temurin](https://adoptium.net)).
 - macOS, Windows ou Linux.
-- Un **full read** de calculateur MS41 (fichier de 256 Ko). Aucun n'est fourni.
-- Pour l'onglet Tables : une **définition RomRaider** (fichier XML) de la calibration. Aucune n'est fournie.
+- Un **full read** de calculateur MS41 (fichier de 256 Ko), **fourni par l'utilisateur**. Aucun n'est inclus.
+- Facultatif, **fournis par l'utilisateur** : une **définition RomRaider** (fichier XML) de la calibration pour
+  l'onglet Tables, et un fichier de **labels** (noms des fonctions et des variables) pour le désassemblage, le
+  pseudocode et le graphe. Aucun n'est inclus.
 - Facultatif : une manette (Xbox, PlayStation…) pour piloter l'accélérateur.
 
 ## Installation et lancement
@@ -141,18 +160,39 @@ Garder les fichiers ensemble : le simulateur cherche `lib/` et `docs/` à côté
 | `MS41Simulator.jar` | le simulateur (avec MS41 ECU Tool v1.1.5) |
 | `docs/Guide_utilisateur/` | guide utilisateur (Aide > Guide) et ses captures, utilisées aussi par ce README |
 | `lib/` | bibliothèques pour les manettes (JNA, SDL2) et leurs licences |
+| `docs/claude/` | compétence Claude pour piloter le simulateur par MCP (expérimental) |
+| `LICENSE` | licence CC BY-NC-ND 4.0 (texte officiel) |
 
 Créés à l'usage à côté du jar : `docs/definitions/` (à créer soi-même, pour sa définition RomRaider),
 `data/eeprom/` (EEPROM simulées enregistrées, créé automatiquement) et `ms41_ecu_tool.log` (journal de MS41 ECU Tool).
 
+## Comment il a été fait
+
+Ce projet est du **vibe codage** : le code a été écrit avec une IA (Claude), à partir d'un **gros travail de
+documentation et de rétro-ingénierie fait en amont, pendant et après** : relevés sur la carte (schéma reconstruit,
+équations du décodeur d'adresse mesurées, datasheets des composants), analyse du fonctionnement du calculateur,
+essais comparés au vrai matériel et à la vraie voiture, guide utilisateur et suivi de chaque étape. Le simulateur
+s'appuie sur la description du **matériel** ; il ne contient ni ne reproduit de code BMW, il exécute le binaire que
+l'utilisateur charge.
+
 ## Remarques
 
 - Le code source n'est pas publié : seul l'exécutable est distribué.
+- *Fichier > Enregistrer le binaire modifié…* : enregistre la flash simulée (modifiée par la K-line, les tables ou le
+  serveur MCP) au format du fichier chargé, sans jamais écraser l'original.
 - Menu **Mode Interface** : *extra simple* (moteur virtuel, courbes, chronogrammes, K-line seulement : pour jouer avec
   le moteur), *simple* (sans désassemblage, pseudocode ni graphe), *normal* (sans pseudocode ni graphe) ou *avancé*
   (logiciel complet).
 - Les réglages (fenêtres, thème sombre ou clair, son, manette, capteurs) sont gardés d'un lancement à l'autre.
 - Les cartographies européennes (MS41.0) et américaines (MS41.1 / MS41.2, avec air secondaire) sont acceptées.
 - Limites connues : voir le chapitre *Limites actuelles* du guide.
+
+## Licence
+
+**[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.fr)** (texte officiel : `LICENSE`) :
+utilisation, copie et partage **tels quels** autorisés en citant l'auteur ; **pas d'utilisation commerciale** ;
+**pas de modification** (aucune version modifiée ou dérivée ne peut être diffusée). Les bibliothèques tierces du
+dossier `lib/` gardent leurs propres licences (`lib/LICENCES_TIERS.txt`). Les fichiers fournis par l'utilisateur
+(full read, labels, définition) restent les siens.
 
 © Diolum.fr – [diolum.fr](https://diolum.fr)
