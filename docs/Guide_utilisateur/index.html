@@ -95,6 +95,7 @@
   <a class="sous" href="#chronogrammes">Chronogrammes</a>
   <a class="sous" href="#courbes">Courbes</a>
   <a class="sous" href="#pseudocode">Pseudocode</a>
+  <a class="sous" href="#graphe">Graphe</a>
   <a class="sous" href="#symboles">Symboles</a>
   <a class="sous" href="#accesbus">Accès bus</a>
   <a class="sous" href="#pointsarret">Points d'arrêt</a>
@@ -362,14 +363,15 @@ direct pendant l'exécution (la couleur s'estompe en 2 s). <b>Clic droit</b> sur
 <figure><img src="images/capteurs.png" alt="Onglet Capteurs, fiche du vilebrequin avec le dessin de la couronne"></figure>
 <p>L'onglet <b>Capteurs</b> décrit le matériel qui transforme une grandeur physique en signal pour le calculateur, et
 permet de le modifier pour simuler un autre capteur. Les valeurs en direct et les courbes ne sont pas ici : elles sont
-dans l'onglet Moteur virtuel et dans les Courbes. Douze fiches à gauche : vilebrequin (couronne PMH), arbre à cames,
+dans l'onglet Moteur virtuel et dans les Courbes. Quinze fiches à gauche : vilebrequin (couronne PMH), arbre à cames,
 débitmètre HFM, papillon (potentiomètre), température moteur, température d'air, vitesse véhicule, sondes lambda,
-capteurs de cliquetis, retour d'allumage, batterie, pression de clim. Chaque fiche donne :</p>
+capteurs de cliquetis, retour d'allumage, batterie, vanne de ralenti, injecteurs, arbres à cames, pression de clim. Chaque fiche donne :</p>
 <ul>
   <li>le <b>principe</b> du capteur et son chemin jusqu'au calculateur (broche, entrée analogique ou satellite) ;</li>
-  <li>sa <b>référence</b> et ses <b>caractéristiques</b>. Seules les données connues des documents du projet sont
-      pré-remplies (couronne 60-2 à effet Hall, corps de papillon BMW 13541433385 de 64 mm, 5858 impulsions par km…) ;
-      les autres références sont marquées « non renseignée ». Les deux champs se modifient et sont gardés d'un lancement à
+  <li>sa <b>référence</b> et ses <b>caractéristiques</b>. Les références BMW des pièces du M52 (et
+      du M3 US S52 quand elle diffère) sont pré-remplies avec les caractéristiques publiées par les catalogues de pièces
+      et les fabricants (par exemple capteur de vilebrequin 12141703277 à effet Hall, débitmètre Siemens 5WK9600,
+      injecteur Bosch 0 280 150 440 de 14,5 Ω) ; « non publié » quand aucune source n'a été trouvée. Les deux champs se modifient et sont gardés d'un lancement à
       l'autre ;</li>
   <li>quand le capteur est réglable, ses <b>caractéristiques électriques</b> : <i>Appliquer</i> les prend en compte
       tout de suite, <i>D'origine</i> remet celles du capteur BMW.</li>
@@ -419,8 +421,8 @@ conservés).</p>
   <li><b>Contact (+15)</b> : état de la clé ; recocher remet le calculateur sous tension (RAM perdue, EEPROM relue, nouvel échange EWS).</li>
   <li><b>Mode</b> : <i>Arrêt</i>, <i>Démarreur</i> (régime fixe de 220 tr/min), <i>Régime imposé</i> (le curseur fixe le régime,
       pratique pour explorer les tables), <i>Moteur libre</i> (le régime résulte des combustions et des frottements).</li>
-  <li><b>Moteur</b> monté sur le banc : M52B20, B25, B28 ou le moteur <i>personnalisé</i> (cylindrée, remplissage, frottements).</li>
-  <li><b>Injecteurs</b> montés : Bosch 0 280 150 415 (vert), 440 (rose) ou <i>personnalisés</i>, avec leur débit et leur temps mort réels.</li>
+  <li><b>Moteur</b> monté sur le banc : M52B20, B25, B28, S52B32 (M3 E36 US) ou le moteur <i>personnalisé</i> (cylindrée, remplissage, frottements).</li>
+  <li><b>Injecteurs</b> montés : Bosch 0 280 150 415 (vert), 440 (rose), <b>M3 3.2 US S52</b> (BMW 13641703819) ou <i>personnalisés</i>, avec leur débit et leur temps mort réels. L'injecteur du M3 US est la même pièce que le 440 du M52B28 (Bosch 0 280 150 440) : mêmes débit et temps mort ; il est choisi d'office avec le moteur S52B32.</li>
   <li><b>Réglages du moteur…</b> : ouvre la <a href="#fenetremoteur">fenêtre Moteur</a> (fiches des M52, moteur et injecteurs personnalisés, pression atmosphérique, pression d'essence, retard du VANOS). En dessous : <b>Banc de puissance…</b> (<a href="#banc">banc</a>). L'antidémarrage a son propre onglet, <a href="#ews">EWS</a>.</li>
   <li><b>Injecteurs de la cartographie</b> : reconnus à sa table de temps mort. Si ceux montés diffèrent, l'écart de
       mélange attendu est affiché (ex. « mélange appauvri de 24 % »).</li>
@@ -432,7 +434,15 @@ conservés).</p>
       (au-dessus de 5,7 bar : ralenti clim ; au-dessus de 9,6 bar : compresseur ; au-delà de 24 bar : coupure),
       soit les entrées « clim demandée ». Quand il autorise le compresseur, le satellite colle le relais,
       le compresseur prend du couple au moteur (ligne <b>Compresseur de clim</b> des lectures) et le bit 6 de DME1
-      passe à 1 dans l'onglet CAN. Pied à fond, le calculateur le coupe environ 4 s. La pression au repos vaut 5 bar.</li>
+      passe à 1 dans l'onglet CAN. Pied à fond, le calculateur le coupe environ 4 s. La pression au repos vaut 5 bar.
+      <br><b>Air secondaire</b> (versions US, cartos MS41.1/MS41.2 comme l'ID12 M3) : après un démarrage à froid
+      (−10 à 40 °C), le calculateur colle le relais de la pompe (broche 35) et ouvre la vanne à dépression du clapet
+      (broche 62), toutes deux pilotées par le satellite ; une pompe électrique souffle de l'air dans les deux collecteurs
+      pendant environ 2 minutes (« ~90 s » dans la formation BMW ST055). Cet air appauvrit les gaz vus par les sondes amont
+      (λ ≈ 1,1-1,5 au lieu de 0,7-0,9) : c'est ainsi que le calculateur vérifie le système. Il oxyde aussi les imbrûlés si
+      le collecteur est assez chaud (post-combustion). La case <b>Air secondaire en état de marche</b>, décochée, simule
+      une pompe ou une vanne en panne. Ligne <b>Air secondaire</b> des lectures : relais, vanne et débit soufflé. Les
+      cartos européennes (ID41) ne commandent jamais l'air secondaire.</li>
   <li><b>Pannes simulées</b> : capteur coupé (vilebrequin, came, débitmètre, papillon, température, sondes lambda,
       vitesse, retour d'allumage), défaut matériel du HFM, signaux ABS/ASC, satellite débranché, EEPROM absente,
       EWS muet ou d'une autre voiture, <b>VANOS bloqué</b> au repos ou en avance (code 212). Utile pour provoquer les codes défaut.</li>
@@ -440,7 +450,7 @@ conservés).</p>
       provoqué sur un cylindre ou sur tous (intensité en multiple du bruit du moteur, fréquence en % des cycles),
       capteur 1 (cylindres 1-2-3) ou capteur 2 (cylindres 4-5-6) débranché. Voir <a href="#cliquetis">Cliquetis</a>.</li>
   <li><b>Valeurs du moteur et lectures du firmware</b>, côte à côte : régime, air, lambda, température, avance,
-      vanne de ralenti, VANOS, compte-tours, relais, voyant, compresseur de clim, défauts actifs, couple…</li>
+      vanne de ralenti, VANOS, compte-tours, relais, voyant, compresseur de clim, défauts actifs, couple, air secondaire…</li>
   <li><b>Diagnostic</b> en clair : « le moteur tourne », ou ce qui l'en empêche (antidémarrage, synchronisation perdue,
       pas d'injection, mélange noyé, démarreur relâché trop tôt…).</li>
   <li><b>Actionneurs par cylindre</b>, mesurés sur les broches : durée d'injection, fin d'injection, charge de bobine,
@@ -505,11 +515,12 @@ dans la fenêtre, un front de came par tour). Exemple : deux fronts montants du 
 vanne de ralenti se fermer, puis la coupure d'injection en décélération (lambda au maximum).</p>
 
 <h3 id="pseudocode">Pseudocode</h3>
-<figure><img src="images/pseudocode.png" alt="Onglet Pseudocode : fonction 26E16 avec niveaux de confiance"></figure>
+<figure><img src="images/pseudocode.png" alt="Onglet Pseudocode : FaultDetection_MasterDispatcher structuree, avec niveaux de confiance"></figure>
 <p>L'onglet <b>Pseudocode</b> traduit une fonction du firmware en pseudo-C, ligne par ligne, avec l'instruction d'origine à
 droite. Il est produit par le désassembleur du simulateur (pas par IDA). Saisir une adresse ou un label, ou utiliser
 <b>Fonction du PC</b> (la fonction en cours d'exécution) ou <b>Ligne du désassemblage</b> (la ligne sélectionnée en haut) ;
-sans label, le début de la fonction est deviné (après le retour qui précède) et c'est indiqué. <b>Double-clic</b> sur une
+le début de la fonction vient des bornes du fichier de labels ; sans elles, il est deviné (après le retour qui précède) et
+c'est indiqué. <b>Double-clic</b> sur une
 ligne : l'instruction dans le désassemblage. À l'arrêt, la ligne du PC est surlignée.</p>
 <ul>
   <li><b>H</b> (vert) : traduction directe d'une instruction (affectation, opération, bit, appel direct, retour).</li>
@@ -518,15 +529,46 @@ ligne : l'instruction dans le désassemblage. À l'arrêt, la ligne du PC est su
       <code>CAL_xxxx</code>…).</li>
   <li><b>B</b> (rouge) : saut ou appel indirect (cible inconnue), drapeaux venus d'un autre chemin, octets non décodés.</li>
 </ul>
-<p>Le pseudocode garde les étiquettes et des <code>goto</code> : il ne prétend pas retrouver les <code>if</code> et
-<code>while</code> du programme d'origine. Les noms viennent des labels (fichier chargé, labels automatiques des vecteurs,
-SFR) ; sinon <code>M[0xE9B6]</code> pour la RAM et <code>CAL_01F7</code> pour la calibration. Sur les 314 fonctions appelées
-du firmware ID41 : environ 89 % de lignes H, 10 % M, 0,2 % B.</p>
+<p><b>Structure</b> : le pseudocode est reconstruit à partir du graphe de flot de la fonction (onglet <a href="#graphe">Graphe</a>) :
+<code>if</code> / <code>else if</code> / <code>else</code> jusqu'au point où les branches se rejoignent, boucles
+<code>while (condition)</code>, <code>do … while (condition)</code> ou <code>while (1)</code> avec <code>break</code> et
+<code>continue</code>. La comparaison qui précède un saut disparaît dans la condition (<code>cmpb rl4, X</code> puis
+<code>jmpr cc_C</code> donnent <code>if (rl4 &lt; X)</code>), et une suite de tests qui mènent au même endroit devient une
+seule condition (<code>if (a || b || c)</code>). Il reste un <code>goto</code> quand le code saute dans une partie déjà écrite
+(fin commune à plusieurs chemins, comme le fait le compilateur) : sur les 494 fonctions de l'ID41, 73 % n'en ont aucun.
+Les noms viennent des labels (fichier chargé, labels automatiques des vecteurs, SFR) ; un pointeur vers une table nommée
+s'écrit <code>&amp;Nom</code> (<code>r12 = &amp;VANOS_OnOff_HeavyThrottle</code>) ; sinon <code>M[0xE9B6]</code> pour la RAM et
+<code>CAL_01F7</code> pour la calibration. Le commentaire de la fonction (fichier de labels) est affiché au-dessus. Sur
+les 314 fonctions appelées du firmware ID41 : environ 79 % de lignes H, 9 % M, 0,2 % B (les comparaisons repliées dans
+les conditions ne comptent plus comme lignes).</p>
+
+<h3 id="graphe">Graphe</h3>
+<figure><img src="images/graphe.png" alt="Onglet Graphe : graphe de flot de la boucle principale, bloc du PC surligne"></figure>
+<p>L'onglet <b>Graphe</b> montre une fonction comme la vue graphe d'IDA : un rectangle par bloc de base (suite
+d'instructions sans saut), relié à ses successeurs. Flèche <b>verte</b> : saut pris ; <b>rouge</b> : saut non pris (on
+continue à l'instruction suivante) ; <b>bleue</b> : passage sans condition. Les flèches de boucle (retour vers un bloc
+plus haut) passent à droite des blocs. Le bloc d'entrée est encadré en bleu, celui du PC en vert, l'instruction du PC
+surlignée. Contenu des blocs : <b>Assembleur</b> ou <b>Pseudocode</b> (choix dans la barre). Même choix de fonction que
+dans l'onglet Pseudocode, plus <b>Précédente</b>. <b>Molette</b> : zoom autour de la souris ; <b>glisser</b> : déplacer ;
+<b>Ajuster</b> : toute la fonction à l'écran ; <b>double-clic</b> sur un appel (en bleu) : graphe de la fonction appelée ;
+double-clic sur une autre ligne : l'instruction dans le désassemblage. Les blocs sont rangés en couches (plus long
+chemin depuis l'entrée) et placés pour limiter les croisements.</p>
 
 <h3 id="symboles">Symboles</h3>
 <figure><img src="images/symboles.png" alt="Onglet Symboles"></figure>
 <p>Liste des noms connus (vecteurs, registres, labels chargés par <i>Fichier &gt; Charger des labels</i>). <b>Filtre</b>
 pour chercher ; <b>double-clic</b> pour afficher l'adresse dans le désassemblage.</p>
+<p><b>Labels de chaque logiciel</b> : au chargement d'un full read, le simulateur calcule l'empreinte de son programme
+(zone 0x18000-0x3FFFF, la même pour toutes les voitures d'un même logiciel, quelle que soit la calibration) et charge
+tout seul le fichier de labels qui lui correspond dans <code>data/labels</code> (liste dans <code>index.csv</code>) ; le
+journal l'indique. Un fichier choisi à la main par <i>Fichier &gt; Charger des labels</i> reste en place. Les labels de
+l'ID41 (faits dans IDA) ont été reportés sur les autres logiciels (ID12 M3, ID42, ID59, ID60) par comparaison du code :
+chaque fonction est retrouvée par la ressemblance de ses instructions (adresses masquées), puis les appels, les variables
+RAM et les tables de calibration suivent l'alignement des instructions. Environ 91 à 94 % des labels sont reportés ; le
+rapport (<code>data/labels/rapports</code>) donne pour chacun la méthode et le score. Les adresses changent d'un logiciel à
+l'autre (le régime est en <code>0FAE4</code> sur l'ID41, en <code>0FC3A</code> sur l'ID12, l'ID42 et l'ID60) ; elles ont été
+vérifiées moteur tournant (régime, température d'eau, tension batterie lus en RAM). Pour refaire les fichiers :
+<code>./outils/labels_versions.sh</code>.</p>
 <p><b>Noms automatiques propres au CPU</b>, sans fichier de labels : chaque vecteur matériel saute vers une table de relais
 puis vers son gestionnaire ; le simulateur suit ces sauts au chargement du full read et nomme <code>CC15INT_relais</code>,
 <code>CC15INT_isr</code>, <code>RESET_entree</code>… Un vecteur qui saute sur lui-même (source jamais armée par le programme)
@@ -626,8 +668,18 @@ Sa position est mémorisée.</p>
 <figure><img src="images/moteur_fiche.png" alt="Fenêtre Moteur, fiche du M52B28"><figcaption>Fiche du M52B28.</figcaption></figure>
 <ol class="reperes">
   <li><b>Moteur et injecteurs simulés</b> en ce moment, avec le débit réel des injecteurs à la pression d'essence réglée.</li>
-  <li><b>Onglets</b> : une <b>fiche par M52</b> (B20, B25, B28) avec les caractéristiques constructeur (géométrie, embiellage, vilebrequin, arbres à cames, VANOS, soupapes, couple et
-      puissance, injecteurs…), et l'onglet <b>Personnalisé</b>. Sur une fiche : <i>Simuler ce moteur</i> (avec ses injecteurs
+  <li><b>Onglets</b> : une <b>fiche par moteur</b> (M52B20, B25, B28 et S52B32) avec les caractéristiques constructeur (géométrie, embiellage, vilebrequin, arbres à cames, VANOS, soupapes, couple et
+      puissance, injecteurs…), et l'onglet <b>Personnalisé</b>. <b>S52B32</b> (M3 E36 US 1996-1999) : 3152 cm³,
+      86,4 × 89,6 mm, compression 10,5, 179 kW à 6000 tr/min et 320 N·m à 3800 tr/min, même bloc et même culasse que le M52,
+      injecteurs BMW 13641703819 (Bosch 0 280 150 440, entrée « M3 3.2 US S52 » de la liste), bielles de 135 mm comme le B28,
+      vilebrequin propre au S52. Sa fiche vient des mêmes fichiers que celles des M52 (colonne <i>s52b32</i> de
+      <code>docs/M52 physical specs</code>) ; chaque valeur porte sa source : <i>manufacturer_reported</i> (BMW),
+      <i>common_part_spec</i> (pièce commune), <i>measured_non_OEM</i> (mesures et forums), <i>estimated</i> (hypothèse,
+      souvent « pris égal au M52 ») ou <i>not_available</i> quand rien de fiable n'a été trouvé (diamètres du vilebrequin,
+      masses, plage du VANOS, calage de l'échappement, régime de ralenti…). Les arbres à cames sont pris comme le jeu
+      Schrick 252/244 donné équivalent au S52 US (hypothèse) : les 252° / 244° comptent des rampes longues, la fiche Schrick
+      donne 219° / 206° à 1 mm de levée ; le simulateur utilise donc les durées équivalentes 235° / 222° (son modèle atteint
+      1 mm 8° après l'ouverture), soit un croisement au ralenti proche du M52. Sur une fiche : <i>Simuler ce moteur</i> (avec ses injecteurs
       d'origine) ou <i>Copier dans Personnalisé</i> comme point de départ.</li>
   <li><b>Conditions</b>, valables pour tous les moteurs : <b>pression atmosphérique réelle</b> (en hPa, ou par l'altitude,
       les deux sont liées) et <b>pression d'essence</b> (régulateur). La densité de l'air qui en résulte (avec la température
@@ -658,7 +710,11 @@ virtuel (axe de came 115° → 90° après le PMH sur le B28) : le remplissage e
 à partir des 24 soupapes (2 admission de 33 mm et 2 échappement de 30,5 mm par cylindre), du piston, des conduits du
 collecteur et du calage (aucun pourcentage imposé). Came avancée : meilleur remplissage à bas et moyen
 régime, moins bon au-delà de ~3900 tr/min, et plus de gaz résiduels au ralenti (VANOS bloqué en avance : ralenti bas et
-irrégulier).</p>
+irrégulier). Les écoulements à contre-sens du croisement (gaz brûlés repoussés dans le conduit d'admission ou aspirés
+depuis l'échappement) passent moins bien que l'écoulement normal : leur coefficient est recalé sur une mesure publiée
+(moteur 4 soupapes à calage variable : 35 % de gaz résiduels à 1000 tr/min, 0,44 bar et 42° de croisement), et la
+combustion reste stable jusqu'à ~27 % de gaz brûlés. Les logiciels récents (ID12 M3, ID42, ID60) engagent le VANOS
+au ralenti moteur froid juste après le démarrage : le moteur virtuel le supporte maintenant.</p>
 
 <h3 id="banc">Banc de puissance</h3>
 <p>Ouvert par le bouton <b>Banc de puissance…</b> de l'onglet Moteur virtuel, ou par <i>Outils &gt; Banc de puissance</i>.
@@ -742,20 +798,25 @@ Les deux températures sont dans les Courbes.</p>
 <b>Échappement</b>. Le son suit le régime en temps réel ; en vitesse de simulation « Max », il reste joué au régime du moment.</p>
 <p><b>Settings &gt; Échappement</b> : trois sons, réglés d'après des enregistrements de 328i E36 (gardé d'un lancement à l'autre) :</p>
 <ul>
-  <li><b>Origine</b> (silencieux BMW) : grave et feutré, caisse grave marquée ;</li>
-  <li><b>X-pipe + silencieux race</b> (type Supersprint) : plus clair et plus rauque ;</li>
-  <li><b>Silencieux race</b> (type Eisenmann) : rond au ralenti, avec une forte variation d'un cycle à l'autre, s'ouvre vite
-      en montant en régime.</li>
+  <li><b>Origine</b> (silencieux BMW) : grave et feutré au ralenti, glouglou marqué, s'éclaircit en charge (le silencieux
+      laisse passer plus d'aigu quand le débit des gaz augmente) ;</li>
+  <li><b>X-pipe + silencieux race</b> (type Supersprint) : même ligne que le silencieux race, mais le X égalise les bouffées
+      des deux bancs (son plus régulier) et laisse passer plus d'aigu ;</li>
+  <li><b>Silencieux race</b> (type Eisenmann) : rond au ralenti, grave de caisse vers 60 Hz, différences entre cylindres
+      marquées, s'ouvre vite en montant en régime.</li>
 </ul>
-<p>Il n'y a <b>aucun bruit continu</b> (pas de souffle) : tout le son vient des bouffées des cylindres. Le grain vient de
-ce qui varie d'une bouffée à l'autre et de la ligne : la force de chaque combustion change un peu d'un cycle à l'autre,
-les fortes bouffées sont légèrement écrêtées (son rauque, sans écraser l'écart ralenti / pleine charge), et le tube de
-sortie a une résonance grave propre à chaque échappement.</p>
+<p>Le son vient presque entièrement des bouffées des cylindres. Il s'y ajoute un <b>souffle léger</b> (bruit des gaz qui
+suit chaque bouffée), volontairement très en dessous du son du moteur. Le grain vient de ce qui varie d'une bouffée à
+l'autre : la force de chaque combustion change un peu d'un cycle à l'autre et chaque cylindre est légèrement différent.
+Les tubes renvoient une partie de l'onde depuis le silencieux (résonances des tubes), le silencieux filtre les aigus et
+la caisse ajoute une résonance grave propre à chaque échappement. À un coup d'accélérateur, le moteur virtuel peut rater
+un ou deux cycles (le carburant n'a pas encore rattrapé l'air) : on entend une bouffée plus faible, pas un trou.</p>
 <figure><img src="images/son_echappement.png" alt="Spectres des enregistrements et du simulateur, au ralenti et en montée en régime"></figure>
 <p>Sur la figure : la répartition de l'énergie par tiers d'octave (de 63 Hz à 1,6 kHz) des enregistrements (blanc) et
-du simulateur (bleu), au ralenti et en montée en régime. Les écarts restants viennent en partie des enregistrements :
-vidéos prises avec des micros et à des distances différentes, régime inconnu, bruit ambiant. Le niveau sonore de chaque
-échappement n'est pas mesurable sur ces vidéos : le X-pipe et le silencieux race sont réglés un peu plus fort (+2 et +3 dB).</p>
+du simulateur (bleu), au ralenti et en montée en régime (2000 à 4500 tr/min). Les écarts restants viennent en partie des
+enregistrements : vidéos prises avec des micros et à des distances différentes, bruit ambiant, et ralenti différent
+(l'enregistrement du X-pipe tourne vers 1000 tr/min, le moteur virtuel vers 700). Les réglages finaux ont été choisis
+à l'écoute. Le niveau sonore de chaque échappement n'est pas mesurable sur ces vidéos.</p>
 
 <h3 id="manette">Manette (menu Settings)</h3>
 <figure><img src="images/manette.png" alt="Settings > Manette"></figure>
@@ -846,6 +907,9 @@ ouvrir la communication au ralenti (elle reste ensuite ouverte, jusqu'à 30 s sa
   <li><b>Entrée du contact</b> : le firmware ne détecte la coupure qu'à la chute de la tension mesurée sur AN5 ; le simulateur
       fait tomber cette tension avec le contact (le câblage exact reste à confirmer sur la carte).</li>
   <li><b>Son</b> : synthèse réglée sur des enregistrements de 328i E36, à juger à l'oreille.</li>
+  <li><b>S52B32</b> : au banc virtuel, environ 93 % du couple et 84 % de la puissance constructeur. Le collecteur
+      d'admission du S52 n'est pas modélisé (celui du M52 est utilisé), ses arbres à cames et sa bielle sont des hypothèses,
+      et la cartographie chargée reste celle du calculateur lu (un M3 US a un MS41.2 avec sa propre calibration).</li>
   <li><b>Couple et puissance maxi</b> : 93 à 99 % des valeurs constructeur pour B20, B25 et B28 (le remplissage est recalé sur les valeurs du B28 ; les B20 et B25 prennent la même forme de courbe, et leurs injecteurs 415 avec la cartographie du B28 donnent un mélange pauvre).</li>
   <li><b>Papillon</b> : grand ouvert, le firmware lit environ 85 % avec le potentiomètre d'origine du simulateur
       (0,66-4,35 V) ; l'échelle ou la course réelle du capteur restent à vérifier sur la voiture.</li>
