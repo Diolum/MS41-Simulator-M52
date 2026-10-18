@@ -187,6 +187,16 @@ l'utilisateur charge.
 - Les cartographies européennes (MS41.0) et américaines (MS41.1 / MS41.2, avec air secondaire) sont acceptées.
 - Limites connues : voir le chapitre *Limites actuelles* du guide.
 
+## Suivi, bugs et améliorations
+
+Le projet est suivi : je corrige les bugs et apporte des améliorations au fil du temps. Le suivi se fait par les
+**issues GitHub** (onglet **Issues**, en haut du dépôt).
+
+Vous êtes invités à **signaler un souci** (comportement inattendu, plantage, valeur qui paraît fausse) ou à
+**proposer une amélioration** : bouton **New issue**. Pour un bug, indiquer ce qui était attendu, ce qui s'est passé
+et de quoi le reproduire (moteur simulé, calibration, étapes) aide beaucoup — sans jamais joindre de full read, de
+labels ni de définition contenant des données BMW ou un numéro de châssis.
+
 ## Soutenir le projet
 
 Le simulateur est gratuit. S'il vous est utile et que vous voulez soutenir le travail de rétro-ingénierie, de
