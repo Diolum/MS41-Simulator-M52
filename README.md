@@ -187,6 +187,15 @@ l'utilisateur charge.
 - Les cartographies européennes (MS41.0) et américaines (MS41.1 / MS41.2, avec air secondaire) sont acceptées.
 - Limites connues : voir le chapitre *Limites actuelles* du guide.
 
+## Soutenir le projet
+
+Le simulateur est gratuit. S'il vous est utile et que vous voulez soutenir le travail de rétro-ingénierie, de
+documentation et de développement qu'il représente, un don est possible par PayPal :
+
+**[Faire un don avec PayPal](https://www.paypal.com/qrcodes/p2pqrc/8T3B5EBD83SLY)**
+
+Merci !
+
 ## Licence
 
 **[CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.fr)** (texte officiel : `LICENSE`) :
