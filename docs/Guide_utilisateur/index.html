@@ -69,9 +69,16 @@
 <div class="cadre">
 <nav>
   <div class="titre">MS41 Simulator</div>
-  <div class="version">Guide utilisateur – version 1.0.1</div>
+  <div class="version">Guide utilisateur – version 1.0.2</div>
   <a href="#presentation">Présentation</a>
   <a href="#rapide">Démarrage rapide</a>
+  <a href="#emploi">Mode d'emploi par onglet</a>
+  <a class="sous" href="#emploi-sim">Moteur, banc, capteurs</a>
+  <a class="sous" href="#emploi-obs">Observer</a>
+  <a class="sous" href="#emploi-code">Code et labels</a>
+  <a class="sous" href="#emploi-debug">Déboguer</a>
+  <a class="sous" href="#emploi-com">K-line, CAN, EWS, ECU Tool</a>
+  <a class="sous" href="#emploi-fen">Fenêtres et menus</a>
   <a href="#fenetre">La fenêtre principale</a>
   <a class="sous" href="#modes">Modes d'interface</a>
   <a class="sous" href="#theme">Apparence</a>
@@ -98,6 +105,7 @@
   <a class="sous" href="#pseudocode">Pseudocode</a>
   <a class="sous" href="#graphe">Graphe</a>
   <a class="sous" href="#symboles">Symboles</a>
+  <a class="sous" href="#labels-edition">Renommer et commenter</a>
   <a class="sous" href="#accesbus">Accès bus</a>
   <a class="sous" href="#pointsarret">Points d'arrêt</a>
   <a class="sous" href="#interruptions">Interruptions</a>
@@ -165,6 +173,194 @@ utilisation et partage tels quels en citant l'auteur, sans usage commercial ni m
     onglets <i>Courbes</i> et <i>Chronogrammes</i>, et dans <i>Tables</i> (cellules lues en orange).</li>
   <li><b>Diagnostic</b> : <i>Outils &gt; MS41 ECU Tool</i> pour l'identification, les défauts et les données en direct.</li>
 </ol>
+
+<h2 id="emploi">Mode d'emploi : que faire dans chaque onglet et chaque fenêtre</h2>
+<p>Cette partie répond à « <i>je veux faire ceci, où dois-je aller ?</i> » puis donne, pour chaque onglet et chaque
+fenêtre, une marche à suivre courte. Le détail de chaque réglage est dans la section correspondante (liens en tête de chaque
+rubrique).</p>
+
+<table>
+  <tr><th>Je veux…</th><th>Où</th></tr>
+  <tr><td>faire tourner le moteur, le démarrer, le couper, simuler une panne</td><td><a href="#moteur">Moteur virtuel</a></td></tr>
+  <tr><td>voir l'évolution d'une valeur (régime, air, lambda, avance…)</td><td><a href="#courbes">Courbes</a></td></tr>
+  <tr><td>voir les signaux logiques (vilebrequin, bobines, injecteurs…) et mesurer un écart</td><td><a href="#chronogrammes">Chronogrammes</a></td></tr>
+  <tr><td>savoir quelle cellule d'une cartographie le firmware lit en ce moment</td><td><a href="#tables">Tables</a></td></tr>
+  <tr><td>changer un capteur (couronne, papillon, courbes de température…)</td><td><a href="#capteurs">Capteurs</a></td></tr>
+  <tr><td>mesurer couple et puissance</td><td><a href="#banc">Banc de puissance</a></td></tr>
+  <tr><td>lire l'identification, les défauts, les données en direct, lire ou écrire la flash</td><td><a href="#ecutool">MS41 ECU Tool</a> (ou <a href="#kline">K-line</a> pour les trames brutes)</td></tr>
+  <tr><td>lire le code du firmware</td><td><a href="#desassemblage">Désassemblage</a>, <a href="#pseudocode">Pseudocode</a>, <a href="#graphe">Graphe</a></td></tr>
+  <tr><td>donner un nom ou un commentaire à une variable ou à une fonction</td><td><a href="#labels-edition">clic droit</a> dans ces trois vues, ou dans <a href="#symboles">Symboles</a></td></tr>
+  <tr><td>m'arrêter quand le programme passe à un endroit ou touche une variable</td><td><a href="#pointsarret">Points d'arrêt</a></td></tr>
+  <tr><td>trouver qui lit ou écrit une variable</td><td><a href="#accesbus">Accès bus</a>, <a href="#memoire">Mémoire CPU</a></td></tr>
+  <tr><td>voir quelles interruptions sont servies</td><td><a href="#interruptions">Interruptions</a></td></tr>
+  <tr><td>voir les trames du bus CAN, simuler une boîte automatique</td><td><a href="#can">CAN</a></td></tr>
+  <tr><td>comprendre l'antidémarrage, tester un refus de démarrage</td><td><a href="#ews">EWS</a></td></tr>
+  <tr><td>regarder ce qui se passe dans une puce de la carte</td><td><a href="#puces">Matériel</a></td></tr>
+  <tr><td>lire les messages du simulateur</td><td><a href="#journal">Journal</a></td></tr>
+</table>
+
+<h3 id="emploi-sim">Piloter le moteur et la simulation</h3>
+<p><b>Moteur virtuel</b> (<a href="#moteur">détail</a>)</p>
+<ol>
+  <li>Charger un full read (<i>Fichier &gt; Charger full read…</i>), choisir le <b>moteur</b> et les <b>injecteurs</b> montés.</li>
+  <li>Cliquer sur <b>Démarrer</b> et choisir la vitesse <i>temps réel</i> dans la barre d'outils. Le résultat du démarrage (temps, ou raison de l'échec) s'affiche dans l'onglet.</li>
+  <li>Régler <b>Papillon</b>, <b>températures</b>, <b>batterie</b>… avec les curseurs ; pour explorer les tables à un point précis, passer en mode
+      <i>Régime imposé</i> et régler le régime et le papillon.</li>
+  <li>Cocher une <b>panne simulée</b> pour provoquer un code défaut ; la ligne <i>Diagnostic</i> dit ce qui empêche le moteur de tourner, les <i>lectures du firmware</i> montrent ce que voit le calculateur.</li>
+  <li><b>Couper le contact</b> pour voir le post-fonctionnement et la sauvegarde de l'EEPROM ; recocher <i>Contact (+15)</i> pour rallumer.</li>
+</ol>
+<p><b>Fenêtre Moteur</b> (<i>Réglages du moteur…</i>, <a href="#fenetremoteur">détail</a>)</p>
+<ol>
+  <li>Une fiche par moteur : lire ses caractéristiques, <i>Simuler ce moteur</i> pour le monter.</li>
+  <li>Onglet <b>Personnalisé</b> : saisir cylindrée, remplissage, frottements, injecteurs, <i>Appliquer</i>, cocher <i>Simuler ce moteur</i> / <i>Monter ces injecteurs</i>. L'effet est immédiat, à suivre dans les Courbes.</li>
+  <li>Régler la pression atmosphérique (ou l'altitude), la pression d'essence et le retard du VANOS dans les <i>Conditions</i>.</li>
+</ol>
+<p><b>Banc de puissance</b> (<a href="#banc">détail</a>)</p>
+<ol>
+  <li>Choisir le type de mesure : <i>Tir</i> (montée continue du régime), <i>Balayage par paliers</i> ou <i>Régime tenu</i>.</li>
+  <li>Lancer ; le moteur est démarré si besoin. La courbe de couple (bleu) et de puissance (rouge) se trace, le résumé compare au constructeur.</li>
+  <li><i>Garder comme référence</i> avant de modifier quelque chose (cartographie, injecteurs, altitude…) pour comparer ensuite ; <i>Exporter CSV</i> pour garder les points.</li>
+</ol>
+<p><b>Capteurs</b> (<a href="#capteurs">détail</a>)</p>
+<ol>
+  <li>Choisir un capteur dans la liste de gauche : sa fiche donne le principe, la référence BMW et les caractéristiques.</li>
+  <li>Modifier ce qui est réglable (couronne et type du capteur de vilebrequin, bornes et loi du papillon, courbes de température et du débitmètre), puis <i>Appliquer</i>.</li>
+  <li>La barre d'état affiche <b>CAPTEURS MODIFIÉS</b> tant que quelque chose diffère de l'origine ; <i>D'origine</i> ou <i>Tout remettre d'origine</i> annule.</li>
+</ol>
+
+<h3 id="emploi-obs">Observer : valeurs, signaux, cartographies</h3>
+<p><b>Courbes</b> (<a href="#courbes">détail</a>)</p>
+<ol>
+  <li>Choisir les <b>voies affichées</b> (capteurs, tensions des broches, actionneurs, voies par cylindre, variables du firmware).</li>
+  <li>Régler la <b>durée affichée</b>. Donner un coup de papillon dans l'onglet Moteur virtuel et regarder les pistes réagir.</li>
+  <li><b>Figer l'affichage</b> pour lire : l'enregistrement continue. Survoler une piste : le curseur donne la valeur de toutes les pistes au même instant.</li>
+  <li><i>Exporter CSV</i> pour garder tout l'enregistrement (s'ouvre dans Excel).</li>
+</ol>
+<p><b>Chronogrammes</b> (<a href="#chronogrammes">détail</a>)</p>
+<ol>
+  <li>Moteur tournant, laisser <i>Caler sur le PMH cyl. 1</i> coché : l'image reste stable.</li>
+  <li>Choisir les signaux avec <i>Voies…</i> et la durée avec <i>Fenêtre</i>.</li>
+  <li><i>Figer</i> (ou mettre en pause), puis cliquer sur un front pour poser un marqueur, sur un second pour lire l'écart en ms, la fréquence et l'angle ; clic droit retire un marqueur.</li>
+</ol>
+<p><b>Tables</b> (<a href="#tables">détail</a>)</p>
+<ol>
+  <li>Dans la liste de gauche, choisir une table (ou le <i>Filtre</i>, ou <i>Lues récemment</i> pour ne voir que celles que le firmware lit).</li>
+  <li>Observer les cellules oranges (lues par le CPU) et le point bleu (position exacte entre les cases).</li>
+  <li>Pour modifier plusieurs cellules d'un coup : sélectionner la zone, clic droit, puis <i>Ajouter…</i>, <i>Multiplier…</i> ou <i>Définir…</i>.</li>
+  <li><b>Double-clic sur une valeur</b> pour la modifier : saisir, <kbd>Entrée</kbd> ; elle est écrite dans la flash simulée et le firmware la voit tout de suite (<i>Valeurs brutes</i> pour saisir l'octet).</li>
+  <li>Cocher <i>Vue 3D</i> pour le relief ; double-clic sur la table dans la liste pour l'ouvrir dans une fenêtre et en suivre plusieurs à la fois.</li>
+</ol>
+<p><b>Mémoire CPU</b> (<a href="#memoire">détail</a>)</p>
+<ol>
+  <li>Utiliser les boutons de zone (vecteurs, identification, calibration, code, CAN, RAM externe, RAM interne, SFR) ou <i>Aller à</i> une adresse.</li>
+  <li>Moteur tournant, les octets lus passent en orange et ceux écrits en rouge : on voit tout de suite quelles variables vivent.</li>
+  <li>Clic droit sur un octet : point d'arrêt mémoire en écriture, en lecture ou les deux.</li>
+</ol>
+<p><b>Matériel</b> (<a href="#puces">détail</a>)</p>
+<ol>
+  <li>Choisir le sous-onglet de la puce (CPU, Flash, RAM, PLCC, EEPROM) : sa description, ses broches et son contenu en direct.</li>
+  <li><i>Aller à</i> une adresse ou <i>Dernier accès</i> ; double-clic sur un octet pour le modifier (le firmware voit la nouvelle valeur) ; <i>Enregistrer… / Charger…</i> pour sauvegarder ou remplacer le contenu de la puce.</li>
+</ol>
+<p><b>Broches du CPU</b> et <b>Registres CPU</b> (<a href="#broches">broches</a>, <a href="#registres">registres</a>)</p>
+<ol>
+  <li>Dans les broches, repérer le signal par sa fonction sur la carte ou son numéro X6000 ; cocher « Broches utilisées par la carte seulement » pour alléger la liste.</li>
+  <li>Double-clic sur une entrée : la bascule ; double-clic sur une entrée analogique AN0-AN9 : règle sa tension (utile pour tester un capteur sans le moteur virtuel).</li>
+  <li>Dans les registres, suivre PC, pile, PSW et banques pendant un pas à pas.</li>
+</ol>
+<p><b>Interruptions</b> (<a href="#interruptions">détail</a>)</p>
+<ol>
+  <li>À gauche, trouver la source (CAPCOM, timer, ADC, liaison série) ; les colonnes donnent l'autorisation, la demande en attente, la priorité et le nombre de fois où elle a été servie.</li>
+  <li>Une source dont le compteur ne bouge pas n'est pas armée ou n'est jamais déclenchée : utile pour vérifier qu'un événement matériel atteint le firmware.</li>
+  <li>À droite, les 8 canaux PEC (transferts automatiques) : compteur, taille, source, destination.</li>
+</ol>
+
+<h3 id="emploi-code">Lire le code, nommer, suivre l'exécution</h3>
+<p><b>Désassemblage</b> (<a href="#desassemblage">détail</a>)</p>
+<ol>
+  <li>Taper une adresse hexa ou un nom dans <i>Aller à</i> ; <b>&lt;</b> revient en arrière ; <b>Reset</b> va au point d'entrée.</li>
+  <li>Cocher <b>Suivre l'exécution</b> : la vue se centre toute seule sur l'instruction en cours, même CPU en marche.</li>
+  <li><kbd>F7</kbd> / <kbd>F8</kbd> / <kbd>Maj</kbd>+<kbd>F8</kbd> : pas à pas ; <kbd>F2</kbd> pose un point d'arrêt sur la ligne ; <kbd>F4</kbd> exécute jusqu'à la ligne.</li>
+  <li>Double-clic sur un saut ou un appel : on y va. Clic droit : menu (point d'arrêt, exécuter jusqu'ici, placer le PC, renommer, commenter, afficher dans le graphe / le pseudocode).</li>
+</ol>
+<p><b>Pseudocode</b> et <b>Graphe</b> (<a href="#pseudocode">pseudocode</a>, <a href="#graphe">graphe</a>)</p>
+<ol>
+  <li>Choisir la fonction dans la liste de gauche (filtre par nom ou adresse), ou <i>Fonction du PC</i>, ou <i>Ligne du désassemblage</i>.</li>
+  <li>Dans le pseudocode, les repères <b>H / M / B</b> disent la confiance de chaque ligne ; <i>Assembleur</i> montre ou masque l'instruction d'origine.</li>
+  <li>Dans le graphe : molette = zoom, glisser = déplacer, <i>Ajuster</i> = tout voir, double-clic sur un appel = fonction appelée ; <i>Précédente</i> revient.</li>
+  <li>Cocher <i>Suivre l'exécution</i> pour que la vue accompagne le PC, et <i>Synchroniser</i> pour que pseudocode et graphe affichent la même fonction (voir ci-dessous).</li>
+  <li>L'instruction en cours est toujours en orange, ainsi que la fonction en cours dans la liste. Cocher <i>Settings &gt; Surligné exploré</i> (décoché par défaut) en plus : le code exécuté récemment est teinté en turquoise (aussi dans les listes de fonctions), on voit le chemin réellement pris.</li>
+</ol>
+<figure><img src="images/synchro_vues.png" alt="Pseudocode et graphe côte à côte, synchronisés"><figcaption>Mode combiné : le pseudocode dans la fenêtre principale, le graphe détaché à côté ; la fonction et la ligne choisies dans l'un s'affichent dans l'autre.</figcaption></figure>
+<p><b>Symboles</b> (<a href="#symboles">détail</a>)</p>
+<ol>
+  <li>Filtrer par nom ; double-clic : l'adresse s'affiche dans le désassemblage.</li>
+  <li>Clic droit : renommer ou commenter. <i>Fichier &gt; Enregistrer les labels</i> garde le travail dans le dossier <code>data/labels</code>, rechargé tout seul pour la bonne version du logiciel.</li>
+</ol>
+<p><b>Renommer et commenter</b> (<a href="#labels-edition">détail</a>)</p>
+<ol>
+  <li>Clic droit sur le mot (variable, fonction, étiquette) dans le désassemblage, le pseudocode ou le graphe.</li>
+  <li><b>Renommer…</b> : le nouveau nom apparaît partout tout de suite. <b>Commentaire…</b> : un texte libre, affiché <b>au survol</b> du mot.</li>
+  <li><b>Afficher dans le graphe / le pseudocode / le désassemblage</b> passe d'une vue à l'autre sur la même fonction.</li>
+</ol>
+<div class="deux">
+<figure><img src="images/label_menu.png" alt="Menu du clic droit sur une variable du pseudocode"><figcaption>Clic droit sur une variable.</figcaption></figure>
+<figure><img src="images/label_survol.png" alt="Commentaire affiché au survol d'une variable"><figcaption>Le commentaire s'affiche au survol.</figcaption></figure>
+</div>
+
+<h3 id="emploi-debug">Déboguer : arrêts et accès</h3>
+<p><b>Points d'arrêt</b> (<a href="#pointsarret">détail</a>)</p>
+<ol>
+  <li><b>Code</b> : saisir une adresse ou un nom de label, <i>Ajouter</i> ; ou <kbd>F2</kbd> sur une ligne du désassemblage. La case <i>Actif</i> garde le point sans qu'il serve.</li>
+  <li><b>Mémoire</b> : saisir une adresse (ou plage), lecture / écriture, éventuellement une valeur. Exemple : <code>E655</code> écrit avec <code>AA</code> arrête à la fin des contrôles de démarrage.</li>
+  <li>Quand l'arrêt survient, l'en-tête passe à <b>ARRÊT : POINT D'ARRÊT</b> ; <i>Run</i> reprend. La colonne <i>Déclenchements</i> compte les arrêts ; <i>Tout effacer</i> remet à zéro.</li>
+</ol>
+<p><b>Accès bus</b> (<a href="#accesbus">détail</a>)</p>
+<ol>
+  <li>Régler les filtres <b>avant</b> la capture : zone (par exemple <i>RAM int</i>), <i>Lectures</i> / <i>Écritures</i>, plage d'adresses en hexa.</li>
+  <li>Choisir la taille du tampon et <i>Circulaire</i> (les derniers accès) ou <i>Arrêt quand plein</i> (les premiers après <i>Effacer</i>).</li>
+  <li>Lancer la simulation : la colonne <i>Instr.</i> dit quelle instruction accède ; double-clic dessus pour aller au code.</li>
+</ol>
+<p><b>Journal</b> (<a href="#journal">détail</a>)</p>
+<ol>
+  <li>À consulter au chargement d'un full read : sommes de contrôle fausses, définition choisie, fichier de labels reconnu pour la version du logiciel.</li>
+  <li>Il garde aussi les traps matériels, les arrêts sur point d'arrêt et la connexion de MS41 ECU Tool.</li>
+</ol>
+
+<h3 id="emploi-com">Communiquer : K-line, CAN, EWS, ECU Tool</h3>
+<p><b>K-line</b> (<a href="#kline">détail</a>)</p>
+<ol>
+  <li>Lancer <i>Run</i> (le calculateur ne répond que s'il tourne).</li>
+  <li>Taper une trame DS2 en hexa <b>sans</b> checksum (ajouté automatiquement) : <code>12 04 00</code> = identification, <code>12 05 04 00</code> = défauts.</li>
+  <li>Lire la réponse dans la liste (sens, heure simulée). <i>Défilement auto</i> suit le bas de la liste.</li>
+  <li>Le bouton <b>MS41 ECU Tool</b> ouvre l'outil complet branché sur la même ligne.</li>
+</ol>
+<p><b>MS41 ECU Tool intégré</b> (<a href="#ecutool">détail</a>)</p>
+<ol>
+  <li><i>Outils &gt; MS41 ECU Tool</i> : l'outil s'ouvre, déjà branché (« Simulateur MS41 (USB) », 9600 bauds) ; la simulation passe en temps réel, Run doit être lancé.</li>
+  <li>Ouvrir la communication <b>au ralenti</b> (au-dessus de 2000 tr/min le calculateur ignore la demande), puis identification, défauts, données en direct, activations.</li>
+  <li>Pour lire ou écrire la flash en mode Fast, le moteur doit être <b>arrêté</b> ; couper puis remettre le contact (onglet Moteur virtuel) pour quitter le mode service.</li>
+  <li>Après une écriture : <i>Fichier &gt; Enregistrer le binaire modifié…</i>.</li>
+</ol>
+<p><b>CAN</b> (<a href="#can">détail</a>)</p>
+<ol>
+  <li>Le tableau montre la dernière trame de chaque identifiant (DME1, DME2, DME4), décodée.</li>
+  <li>Cocher <b>Autres calculateurs sur le bus</b> pour que les trames soient acquittées ; <b>Court-circuit CAN H / CAN L</b> provoque un bus-off.</li>
+  <li>Pour une boîte automatique : cocher <b>Boîte automatique (EGS)</b>, régler le code de rapport et la réduction de couple, puis couper et remettre le contact (le calculateur ne détecte la boîte qu'à la mise sous tension).</li>
+</ol>
+<p><b>EWS</b> (<a href="#ews">détail</a>)</p>
+<ol>
+  <li>Par défaut, <b>AUTOMATIC EWS</b> est coché : le démarrage est toujours autorisé.</li>
+  <li>Pour tester un refus : décocher, <i>Inscrire</i> un autre ISN (ou <i>EWS d'une autre voiture</i>), puis couper et remettre le contact : le démarrage est refusé et le code 209 est posé.</li>
+  <li>Le journal des échanges montre chaque message (ISN envoyé, ISN attendu, résultat) ; les pannes <i>EWS débranché</i> et <i>somme de contrôle faussée</i> donnent le code 18.</li>
+</ol>
+
+<h3 id="emploi-fen">Fenêtres et menus</h3>
+<ul>
+  <li><b>Fenêtres séparées</b> (<a href="#fenetres">détail</a>) : double-clic sur un onglet (ou clic droit &gt; <i>Ouvrir dans une fenêtre séparée</i>, ou le menu <i>Fenêtres</i>) ; l'onglet reste marqué ↗. Pour rattacher : fermer la fenêtre, ou <i>Remettre ici</i>. Positions retrouvées au lancement suivant.</li>
+  <li><b>Modes d'interface</b> (<a href="#modes">détail</a>) : <i>Mode Interface</i> choisit les onglets montrés, de <i>Extra simple</i> (moteur, courbes, chronogrammes, K-line) à <i>Avancé</i> (tout).</li>
+  <li><b>Settings</b> (<a href="#menus">détail</a>) : son du moteur (mute, volume, échappement), thème sombre ou clair, <a href="#manette">Manette…</a> pour piloter le moteur à la manette, <a href="#mcp">Serveur MCP</a> pour piloter le simulateur depuis Claude.</li>
+  <li><b>Barre d'outils</b> (<a href="#execution">détail</a>) : Reset, Step (avec le nombre d'instructions par pas), Step over, Step out, Run, Pause ; vitesse de simulation à droite (temps réel, max, 1/10 à 1/1000).</li>
+</ul>
 
 <h2 id="fenetre">La fenêtre principale</h2>
 <figure>
@@ -455,8 +651,14 @@ conservés).</p>
       <b>flèche verticale descend sur la surface</b> au point exact (même position que le point bleu), avec les valeurs
       d'entrée des deux axes. Si les axes n'ont pas été comparés (table lue autrement), elle vise le centre des cellules lues
       ensemble (en général un carré de 2 × 2). Une lecture de toute la table (contrôle de la flash) ne la fait pas bouger.</li>
-  <li><b>Ouvrir dans une fenêtre</b> (ou double-clic sur la table) : la table dans sa propre fenêtre, pour en suivre plusieurs à la fois.</li>
+  <li><b>Modifier une valeur</b> : <b>double-clic</b> sur une cellule de la grille (donnée, ou point d'axe quand l'axe est en flash), saisir la valeur dans les unités affichées (virgule ou point décimal), <kbd>Entrée</kbd> : elle est écrite dans la flash simulée, la valeur affichée est celle de l'octet le plus proche (les définitions n'ont pas de formule inverse) ; <kbd>Échap</kbd> annule. Avec <i>Valeurs brutes</i> coché, on saisit l'octet lui-même. Le firmware voit tout de suite la nouvelle valeur ; <i>Fichier &gt; Enregistrer le binaire modifié…</i> la garde dans un fichier (l'original n'est jamais écrasé). Les tables 32 bits, les interrupteurs (Switch) et les axes statiques ne sont pas modifiables ici.</li>
+  <li><b>Modifier une zone</b> : sélectionner plusieurs cellules (glisser, ou <kbd>Maj</kbd> + clic ; les points d'axe ne sont pas concernés), puis <b>clic droit</b> :
+      <b>Ajouter…</b> ajoute une constante à toutes les cellules sélectionnées, <b>Multiplier…</b> les multiplie par une constante, <b>Définir…</b> leur donne à toutes la même valeur.
+      La constante se saisit dans les unités affichées (ou en octets avec <i>Valeurs brutes</i> coché) ; chaque résultat est ramené à l'octet le plus proche et <b>limité à la plage du type</b> (0 à 255 pour un octet non signé, par exemple), le nombre de cellules modifiées est affiché sous le titre. Rien n'est écrit si la saisie est invalide. Même écriture que le double-clic : flash simulée seulement, jamais le fichier d'origine.</li>
+  <li><b>Ouvrir dans une fenêtre</b> (ou double-clic sur la table dans la liste de gauche) : la table dans sa propre fenêtre, pour en suivre plusieurs à la fois.</li>
 </ul>
+
+<figure><img src="images/tables_zone.png" alt="Menu du clic droit sur une zone de cellules sélectionnées : Ajouter, Multiplier, Définir"><figcaption>Zone sélectionnée et menu du clic droit.</figcaption></figure>
 
 <figure><img src="images/tables_3d.png" alt="Vue 3D de la table d'injection de base, fleche sur les cellules lues au ralenti"></figure>
 
@@ -635,6 +837,38 @@ puis vers son gestionnaire ; le simulateur suit ces sauts au chargement du full 
 <code>CC15INT_isr</code>, <code>RESET_entree</code>… Un vecteur qui saute sur lui-même (source jamais armée par le programme)
 est nommé <code>…_boucle</code>. Les pointeurs PEC de la RAM interne (<code>SRCP0</code>-<code>DSTP7</code>) et les registres
 SFR sont nommés aussi. Un label chargé depuis un fichier reste prioritaire.</p>
+
+<p><b>Code exécuté surligné</b> : dans le désassemblage, le pseudocode et le graphe, les instructions exécutées récemment (environ 400 000 instructions, que le CPU tourne ou soit en pause) sont teintées en turquoise, d'autant plus vives qu'elles sont récentes. Dans la liste des <b>Fonctions</b> (à gauche du pseudocode et du graphe), les fonctions qui ont exécuté du code récemment sont teintées de même. Le suivi n'est actif que pendant qu'une de ces vues est affichée <b>et que l'option <i>Settings &gt; Surligné exploré</i> est cochée</b> (décochée par défaut, réglage mémorisé) : sinon rien n'est teinté et le suivi ne coûte rien. <b>Instruction en cours (PC)</b> : toujours en <b>orange</b>, avec ou sans cette option : la ligne du désassemblage et du pseudocode, la ligne et le cadre du bloc dans le graphe, et la fonction en cours (orange et en gras) dans la liste des <b>Fonctions</b>. Sans l'option, c'est tout ce qui est surligné dans ces vues.</p>
+<p><b>Suivre l'exécution</b> : la case « Suivre l'exécution » du désassemblage, du pseudocode et du graphe centre la vue sur l'instruction en cours : si le PC sort de la fonction affichée, la vue passe à la fonction qui le contient, puis la ligne (ou le bloc) du PC est sélectionnée et amenée au milieu. La ligne du PC est mise à jour toute seule, sans avoir à survoler le graphe, y compris pendant que le CPU tourne.</p>
+<p><b>Tableaux et variables de plusieurs octets</b> : le fichier de labels peut contenir une section « sizes » (taille des tableaux et structures nommés). Une adresse située à l'intérieur d'un tableau s'affiche « Nom+offset » dans le désassemblage, le pseudocode et le graphe, et le survol montre le commentaire du tableau. L'en-tête peut aussi lister d'autres empreintes CRC32 (« also ») pour qu'un même fichier serve à plusieurs lectures du même logiciel. Les fichiers fournis dans data/labels ont été reconstruits depuis les bases IDA (noms de fonctions et de variables, commentaires) ; ce qui a été repris d'une autre version du logiciel est marqué « [port …] » et les commentaires générés automatiquement à partir des références « [auto …] ».</p>
+
+<h3 id="labels-edition">Renommer, commenter et enregistrer les labels</h3>
+<p>Dans le <b>désassemblage</b>, le <b>pseudocode</b> et le <b>graphe</b> (et dans les listes <i>Fonctions</i> et <i>Symboles</i>), un
+<b>clic droit</b> sur un mot ou sur une ligne ouvre le menu des labels :</p>
+<ul>
+  <li><b>Renommer « nom »…</b> : nouveau nom d'une fonction, d'une variable ou d'une étiquette (lettres, chiffres, <code>_ . $ ? @</code>,
+      sans espace, un nom déjà pris est refusé). Un nom vide retire le nom choisi. Le nouveau nom apparaît aussitôt dans le désassemblage,
+      le pseudocode, le graphe et les listes.</li>
+  <li><b>Commentaire de « nom »…</b> : texte libre (plusieurs lignes) qui s'affiche <b>au survol</b> de la variable ou de la fonction, dans les trois vues ;
+      dans le désassemblage, un commentaire posé sur l'adresse d'une instruction apparaît dans la colonne <i>Commentaire</i>.</li>
+  <li><b>Afficher dans le graphe</b> / <b>dans le pseudocode</b> / <b>dans le désassemblage</b> (pour une fonction ou une étiquette, selon la vue d'où l'on part) :
+      l'onglet correspondant passe au premier plan (ou sa fenêtre détachée) et montre la fonction.</li>
+  <li><b>Afficher cette fonction dans le graphe</b> (ou <b>dans le pseudocode</b>) : toujours proposé, même sur une ligne sans symbole, pour la fonction (ou la ligne) où l'on a cliqué.</li>
+</ul>
+<p>Le symbole visé est le mot sous la souris ; si le mot n'est pas un nom connu (adresse en hexadécimal par exemple), le menu propose les
+symboles de l'instruction de la ligne : cible du saut ou de l'appel, variable lue ou écrite, label de la ligne.</p>
+<p><b>Mode combiné</b> : la case <i>Synchroniser avec le graphe</i> (pseudocode) / <i>…avec le pseudocode</i> (graphe), cochée par défaut, relie les deux onglets
+: la fonction choisie dans l'un s'affiche dans l'autre, et la ligne cliquée dans l'un est surlignée dans l'autre. Si les deux onglets sont affichés en même temps
+(l'un détaché dans sa propre fenêtre : clic droit sur l'onglet), l'autre se met à jour tout de suite ; en mode onglets (un seul visible à la fois), il reprend la fonction et la ligne
+choisies dès qu'on passe sur son onglet.</p>
+<p><b>Enregistrer</b> : <i>Fichier &gt; Enregistrer les labels</i> (ou <i>sous…</i>) écrit un fichier JSON avec les noms, les bornes des fonctions et les commentaires,
+précédé d'un <b>en-tête de version</b> :
+<code>"program": {"crc": "378F0883", "description": "programme 410G805004006"}</code>. Le <code>crc</code> est l'empreinte du programme chargé (voir plus haut) :
+tout fichier de <code>data/labels</code> qui porte cet en-tête est <b>rechargé automatiquement</b> pour ce logiciel. Le dossier est <b>scanné à l'ouverture</b> du simulateur
+et au chargement d'un full read : le journal liste les fichiers et leur version ; s'il y en a plusieurs pour un même logiciel, le plus récent est utilisé. Le fichier
+chargé est sauvegardé en <code>.bak</code> la première fois qu'on l'écrase ; en quittant (ou en chargeant un autre full read ou d'autres labels), le simulateur propose
+d'enregistrer les modifications. Un fichier de labels d'un autre logiciel est signalé avant d'être chargé. Les anciens fichiers (sans en-tête, avec <code>func_cmts</code> d'IDA
+ou simple texte <code>ADRESSE NOM</code>) restent lisibles ; <code>outils/labels_versions.sh</code> ajoute l'en-tête aux fichiers qu'il produit.</p>
 
 <h3 id="accesbus">Accès bus</h3>
 <figure><img src="images/acces_bus.png" alt="Onglet Accès bus"></figure>
@@ -1000,7 +1234,7 @@ ouvrir la communication au ralenti (elle reste ensuite ouverte, jusqu'à 30 s sa
       arrêter sur un trap matériel ; watchdog actif (reset si non servi).</td></tr>
   <tr><td>Outils</td><td>Moteur : caractéristiques et réglages ; Banc de puissance ; EWS (antidémarrage) ; MS41 ECU Tool branché sur la ligne K du simulateur.</td></tr>
   <tr><td>Fenêtres</td><td>Un onglet par case dans sa propre fenêtre ; tout remettre dans la fenêtre principale ; oublier les positions.</td></tr>
-  <tr><td>Settings</td><td>Mute (son du moteur coupé) ; volume du moteur ; échappement (origine, X-pipe + race, race) ; thème (sombre ou clair) ; Manette… (pilotage du moteur virtuel à la manette).</td></tr>
+  <tr><td>Settings</td><td>Mute (son du moteur coupé) ; volume du moteur ; échappement (origine, X-pipe + race, race) ; thème (sombre ou clair) ; <b>Surligné exploré</b> (teinte le code récemment exécuté, décoché par défaut) ; Manette… (pilotage du moteur virtuel à la manette).</td></tr>
   <tr><td>Mode Interface</td><td>Extra simple, simple, normal ou avancé : onglets et vues montrés (voir <a href="#modes">Modes d'interface</a>).</td></tr>
   <tr><td>Aide</td><td>Ce guide (<kbd>F1</kbd>) ; À propos.</td></tr>
 </table>

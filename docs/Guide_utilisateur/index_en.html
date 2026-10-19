@@ -1,0 +1,1275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS41 Simulator – User guide</title>
+<style>
+  :root {
+    --fond: #f6f7f9; --page: #ffffff; --texte: #1d2330; --doux: #5b6475; --trait: #dfe3ea;
+    --accent: #0b5cad; --rouge: #d62728; --code: #eef1f5; --note: #fff8e1; --note-trait: #f0c24b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fond: #101216; --page: #1b1f25; --texte: #e8eaed; --doux: #8c929b; --trait: #2a2f36;
+            --accent: #409cff; --code: #242a33; --note: #2b2615; --note-trait: #8a6d1d; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fond); color: var(--texte);
+         font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  .cadre { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1500px; margin: 0 auto; }
+  nav { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; padding: 24px 18px;
+        border-right: 1px solid var(--trait); font-size: 14px; }
+  nav .titre { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  nav .version { color: var(--doux); font-size: 12px; margin-bottom: 16px; }
+  nav a { display: block; color: var(--texte); text-decoration: none; padding: 3px 8px; border-radius: 6px; }
+  nav a:hover { background: var(--code); }
+  nav .sous { padding-left: 20px; color: var(--doux); }
+  main { background: var(--page); padding: 32px 48px 80px; min-width: 0; }
+  h1 { font-size: 30px; margin: 0 0 6px; }
+  h2 { font-size: 23px; margin: 56px 0 12px; padding-top: 12px; border-top: 1px solid var(--trait); }
+  h3 { font-size: 18px; margin: 32px 0 8px; }
+  p, li { max-width: 78ch; }
+  a { color: var(--accent); }
+  code, kbd { font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace; font-size: 0.88em;
+              background: var(--code); padding: 1px 5px; border-radius: 4px; }
+  kbd { border: 1px solid var(--trait); border-bottom-width: 2px; }
+  .chapo { color: var(--doux); font-size: 17px; max-width: 78ch; }
+  figure { margin: 18px 0 8px; }
+  figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--trait); border-radius: 6px;
+               box-shadow: 0 2px 10px rgba(0,0,0,.08); cursor: zoom-in; }
+  figcaption { color: var(--doux); font-size: 14px; margin-top: 6px; }
+  ol.reperes { list-style: none; padding: 0; counter-reset: rep; max-width: 90ch; }
+  ol.reperes > li { counter-increment: rep; position: relative; padding: 4px 0 6px 40px; max-width: none; }
+  ol.reperes > li::before { content: counter(rep); position: absolute; left: 0; top: 4px; width: 26px; height: 26px;
+               border-radius: 50%; background: var(--rouge); color: #fff; font-weight: 700; font-size: 14px;
+               display: flex; align-items: center; justify-content: center; border: 2px solid #fff;
+               box-shadow: 0 0 0 1px var(--rouge); }
+  table { border-collapse: collapse; margin: 12px 0; font-size: 15px; display: block; max-width: 100%; overflow-x: auto; }
+  th, td { border: 1px solid var(--trait); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code); }
+  .note { background: var(--note); border-left: 4px solid var(--note-trait); padding: 10px 14px; border-radius: 4px;
+          max-width: 78ch; margin: 14px 0; }
+  .etapes { counter-reset: et; list-style: none; padding: 0; }
+  .etapes > li { counter-increment: et; position: relative; padding-left: 44px; margin-bottom: 12px; }
+  .etapes > li::before { content: counter(et); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 8px;
+               background: var(--accent); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .deux { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start; }
+  #zoom { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; align-items: center; justify-content: center;
+          cursor: zoom-out; z-index: 10; padding: 20px; }
+  #zoom img { max-width: 100%; max-height: 100%; }
+  @media (max-width: 900px) {
+    .cadre { grid-template-columns: minmax(0, 1fr); }
+    .deux { grid-template-columns: minmax(0, 1fr); }
+    nav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--trait); }
+    main { padding: 20px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="cadre">
+<nav>
+  <div class="titre">MS41 Simulator</div>
+  <div class="version">User guide – version 1.0.2</div>
+  <a href="#presentation">Overview</a>
+  <a href="#rapide">Quick start</a>
+  <a href="#emploi">How to use each tab</a>
+  <a class="sous" href="#emploi-sim">Engine, dyno, sensors</a>
+  <a class="sous" href="#emploi-obs">Observing</a>
+  <a class="sous" href="#emploi-code">Code and labels</a>
+  <a class="sous" href="#emploi-debug">Debugging</a>
+  <a class="sous" href="#emploi-com">K-line, CAN, EWS, ECU Tool</a>
+  <a class="sous" href="#emploi-fen">Windows and menus</a>
+  <a href="#fenetre">The main window</a>
+  <a class="sous" href="#modes">Interface modes</a>
+  <a class="sous" href="#theme">Appearance</a>
+  <a href="#execution">Running the firmware</a>
+  <a class="sous" href="#desassemblage">Disassembly</a>
+  <a class="sous" href="#registres">CPU registers</a>
+  <a class="sous" href="#broches">CPU pins</a>
+  <a href="#puces">The board's chips</a>
+  <a class="sous" href="#puce-cpu">CPU SAB 80C166W</a>
+  <a class="sous" href="#puce-flash">Flash 28F200</a>
+  <a class="sous" href="#puce-ram">RAM 6264 (U21)</a>
+  <a class="sous" href="#puce-plcc">PALCE16V8 decoder (U22)</a>
+  <a class="sous" href="#puce-eeprom">EEPROM 24C04</a>
+  <a class="sous" href="#puce-can">CAN controller SAE81C91</a>
+  <a class="sous" href="#puce-satellite">ST9 satellite</a>
+  <a href="#onglets">The bottom tabs</a>
+  <a class="sous" href="#memoire">CPU memory</a>
+  <a class="sous" href="#capteurs">Sensors</a>
+  <a class="sous" href="#tables">Tables</a>
+  <a class="sous" href="#moteur">Virtual engine</a>
+  <a class="sous" href="#cliquetis">Knock</a>
+  <a class="sous" href="#chronogrammes">Timing diagrams</a>
+  <a class="sous" href="#courbes">Curves</a>
+  <a class="sous" href="#pseudocode">Pseudocode</a>
+  <a class="sous" href="#graphe">Graph</a>
+  <a class="sous" href="#symboles">Symbols</a>
+  <a class="sous" href="#labels-edition">Renaming and comments</a>
+  <a class="sous" href="#accesbus">Bus access</a>
+  <a class="sous" href="#pointsarret">Breakpoints</a>
+  <a class="sous" href="#interruptions">Interrupts</a>
+  <a class="sous" href="#kline">K-line</a>
+  <a class="sous" href="#can">CAN</a>
+  <a class="sous" href="#ews">EWS</a>
+  <a class="sous" href="#journal">Log</a>
+  <a href="#reglages">Engine, dyno and settings</a>
+  <a class="sous" href="#fenetremoteur">Engine window</a>
+  <a class="sous" href="#banc">Power dyno</a>
+  <a class="sous" href="#contact">Ignition, EEPROM</a>
+  <a class="sous" href="#son">Engine sound</a>
+  <a class="sous" href="#manette">Gamepad</a>
+  <a class="sous" href="#mcp">MCP server (Claude)</a>
+  <a href="#fenetres">Separate windows</a>
+  <a href="#ecutool">Integrated MS41 ECU Tool</a>
+  <a href="#menus">Menus and shortcuts</a>
+  <a href="#limites">Current limitations</a>
+</nav>
+
+<main>
+<h1 id="presentation">MS41 Simulator</h1>
+<p class="chapo">Simulator of the BMW MS41.0 engine ECU (Siemens SAB80C166W processor at 12 MHz). It runs the
+real firmware read from the ECU, instruction by instruction, with its peripherals, a virtual M52 engine
+wired to its pins and a K-line for diagnostic tools.</p>
+
+<p>What you can do:</p>
+<ul>
+  <li>step through the firmware instruction by instruction (disassembly, registers, memory, breakpoints);</li>
+  <li>see live which cells of the calibration tables (RomRaider definition) the ECU reads;</li>
+  <li>run a virtual M52 or S52 engine (B20, B25, B28 or US M3 S52B32): starting, regulated idle, accelerations, sensor faults;</li>
+  <li>hear it (synthesized sound, pops on lift-off), turn the ignition off and back on as on the car;</li>
+  <li>put it on the <b>power dyno</b>: torque and power curves measured at the brake, compared with an estimate derived from the tables;</li>
+  <li>watch the signals on the pins (timing diagrams) and how the sensors change over time (curves);</li>
+  <li>talk over K-line with the simulated ECU, directly or with the integrated <b>MS41 ECU Tool</b> (identification, faults, flash read and write).</li>
+</ul>
+<p>Click an image to enlarge it. The red numbers on the screenshots refer to the lists below each image.</p>
+
+<div class="note"><p><b>About.</b> No BMW software, document or code ships with the simulator: it is a
+<b>hardware emulation</b> of the board (processor, memories, address decoder, peripherals) and of a virtual engine
+wired to its pins. <b>Everyone provides their own files</b>: the full read of their ECU (binary) and, if they
+wish, their labels and their RomRaider definition. The project is <b>vibe coding</b> (code written with an AI, Claude),
+backed by a large documentation and reverse-engineering effort done before, during and after: reconstructed board schematic,
+measured decoder equations, datasheets, tests compared with the real hardware.</p>
+<p>Code and tracking on GitHub: <a href="https://github.com/Diolum/MS41-Simulator-M52/" target="_blank" rel="noopener">github.com/Diolum/MS41-Simulator-M52</a>
+(report a bug or suggest an improvement through the <i>issues</i>).</p>
+<p><a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.fr" target="_blank" rel="noopener"><b>CC BY-NC-ND 4.0</b></a> license:
+use and share as-is with attribution to the author, no commercial use and no modification (<code>LICENSE</code> file).</p></div>
+
+<h2 id="rapide">Quick start</h2>
+<ol class="etapes">
+  <li><b>Launch the simulator</b>: double-click <i>MS41Simulator.jar</i> (Java 8 or newer). The MS41 SIMULATOR
+    startup window is shown while the main window is being prepared.</li>
+  <li><b>Load a full read</b>: <i>File &gt; Load full read…</i> (or the toolbar button). Any 256 KB dump
+    will do, raw chip read or CPU view: the format is detected automatically. A RomRaider definition (XML file)
+    placed in the simulator's <i>docs/definitions</i> folder is loaded automatically; otherwise <i>File &gt;
+    Load a RomRaider definition</i>. Without a definition, everything works except the Tables tab, the recognition of the injectors intended by
+    the map and the dyno estimate from the tables.</li>
+  <li><b>Choose the engine</b> in the <i>Virtual engine</i> tab: M52B20, B25 or B28, and the injectors fitted. The
+    map cannot be used to guess the engine; the choice is remembered.</li>
+  <li><b>Click "Start"</b> in the same tab. The engine is connected, execution (Run) is started and the
+    starter is cranked until the engine runs on its own (usually within 1 to 2 s). Choose the
+    <i>real time</i> speed to watch the engine evolve at its own pace.</li>
+  <li><b>Play with the engine</b>: <i>Throttle</i> slider, temperatures, simulated faults. Follow the result in the
+    <i>Curves</i> and <i>Timing diagrams</i> tabs, and in <i>Tables</i> (read cells in orange).</li>
+  <li><b>Diagnostics</b>: <i>Tools &gt; MS41 ECU Tool</i> for identification, faults and live data.</li>
+</ol>
+
+<h2 id="emploi">How to use each tab and each window</h2>
+<p>This part answers "<i>I want to do this, where do I go?</i>" and then gives, for each tab and window, a short procedure.
+The details of every setting are in the matching section (links at the top of each entry).</p>
+
+<table>
+  <tr><th>I want to…</th><th>Where</th></tr>
+  <tr><td>run the engine, start it, stop it, simulate a fault</td><td><a href="#moteur">Virtual engine</a></td></tr>
+  <tr><td>see how a value changes (RPM, air, lambda, spark advance…)</td><td><a href="#courbes">Curves</a></td></tr>
+  <tr><td>see logic signals (crankshaft, coils, injectors…) and measure a gap</td><td><a href="#chronogrammes">Timing diagrams</a></td></tr>
+  <tr><td>know which cell of a map the firmware is reading right now</td><td><a href="#tables">Tables</a></td></tr>
+  <tr><td>change a sensor (trigger wheel, throttle, temperature curves…)</td><td><a href="#capteurs">Sensors</a></td></tr>
+  <tr><td>measure torque and power</td><td><a href="#banc">Power dyno</a></td></tr>
+  <tr><td>read identification, fault codes, live data, read or write the flash</td><td><a href="#ecutool">MS41 ECU Tool</a> (or <a href="#kline">K-line</a> for raw frames)</td></tr>
+  <tr><td>read the firmware code</td><td><a href="#desassemblage">Disassembly</a>, <a href="#pseudocode">Pseudocode</a>, <a href="#graphe">Graph</a></td></tr>
+  <tr><td>give a name or a comment to a variable or a function</td><td><a href="#labels-edition">right-click</a> in these three views, or in <a href="#symboles">Symbols</a></td></tr>
+  <tr><td>stop when the program reaches a place or touches a variable</td><td><a href="#pointsarret">Breakpoints</a></td></tr>
+  <tr><td>find who reads or writes a variable</td><td><a href="#accesbus">Bus access</a>, <a href="#memoire">CPU memory</a></td></tr>
+  <tr><td>see which interrupts are being served</td><td><a href="#interruptions">Interrupts</a></td></tr>
+  <tr><td>see CAN bus frames, simulate an automatic gearbox</td><td><a href="#can">CAN</a></td></tr>
+  <tr><td>understand the immobilizer, test a start refusal</td><td><a href="#ews">EWS</a></td></tr>
+  <tr><td>look inside a chip of the board</td><td><a href="#puces">Hardware</a></td></tr>
+  <tr><td>read the simulator's messages</td><td><a href="#journal">Log</a></td></tr>
+</table>
+
+<h3 id="emploi-sim">Driving the engine and the simulation</h3>
+<p><b>Virtual engine</b> (<a href="#moteur">details</a>)</p>
+<ol>
+  <li>Load a full read (<i>File &gt; Load full read…</i>), choose the mounted <b>engine</b> and <b>injectors</b>.</li>
+  <li>Click <b>Start</b> and choose the <i>real time</i> speed in the toolbar. The start result (time, or the reason for failure) is shown in the tab.</li>
+  <li>Set <b>Throttle</b>, <b>temperatures</b>, <b>battery</b>… with the sliders; to explore the tables at a precise point, switch to the
+      <i>Fixed RPM</i> mode and set the speed and the throttle.</li>
+  <li>Tick a <b>simulated fault</b> to provoke a fault code; the <i>Diagnosis</i> line says what prevents the engine from running, and the <i>firmware readings</i> show what the ECU sees.</li>
+  <li><b>Turn off the ignition</b> to see the run-on period and the EEPROM save; tick <i>Ignition (+15)</i> again to power the ECU back on.</li>
+</ol>
+<p><b>Engine window</b> (<i>Engine settings…</i>, <a href="#fenetremoteur">details</a>)</p>
+<ol>
+  <li>One sheet per engine: read its specifications, <i>Simulate this engine</i> to fit it.</li>
+  <li><b>Custom</b> tab: enter displacement, filling, friction, injectors, <i>Apply</i>, tick <i>Simulate this engine</i> / <i>Fit these injectors</i>. The effect is immediate; follow it in the Curves.</li>
+  <li>Set the atmospheric pressure (or the altitude), the fuel pressure and the VANOS delay in the <i>Conditions</i>.</li>
+</ol>
+<p><b>Power dyno</b> (<a href="#banc">details</a>)</p>
+<ol>
+  <li>Choose the kind of measurement: <i>Pull</i> (continuous RPM ramp), <i>Step sweep</i> or <i>Held speed</i>.</li>
+  <li>Start; the engine is started if needed. The torque (blue) and power (red) curves are drawn and the summary compares with the manufacturer's figures.</li>
+  <li><i>Keep as reference</i> before changing something (map, injectors, altitude…) to compare afterwards; <i>Export CSV</i> to keep the points.</li>
+</ol>
+<p><b>Sensors</b> (<a href="#capteurs">details</a>)</p>
+<ol>
+  <li>Pick a sensor in the left list: its sheet gives the principle, the BMW part number and the characteristics.</li>
+  <li>Change what is adjustable (trigger wheel and sensor type for the crankshaft, throttle limits and law, temperature and air-flow meter curves), then <i>Apply</i>.</li>
+  <li>The status bar shows <b>SENSORS MODIFIED</b> as long as something differs from the original; <i>Original</i> or <i>Reset everything to original</i> undoes it.</li>
+</ol>
+
+<h3 id="emploi-obs">Observing: values, signals, maps</h3>
+<p><b>Curves</b> (<a href="#courbes">details</a>)</p>
+<ol>
+  <li>Choose the <b>displayed channels</b> (sensors, pin voltages, actuators, per-cylinder channels, firmware variables).</li>
+  <li>Set the <b>displayed duration</b>. Blip the throttle in the Virtual engine tab and watch the tracks react.</li>
+  <li><b>Freeze the display</b> to read it: recording continues. Hover a track: the cursor gives the value of all tracks at the same instant.</li>
+  <li><i>Export CSV</i> to keep the whole recording (opens in Excel).</li>
+</ol>
+<p><b>Timing diagrams</b> (<a href="#chronogrammes">details</a>)</p>
+<ol>
+  <li>With the engine running, leave <i>Lock to cyl. 1 TDC</i> ticked: the picture stays stable.</li>
+  <li>Choose the signals with <i>Channels…</i> and the duration with <i>Window</i>.</li>
+  <li><i>Freeze</i> (or pause), then click an edge to place a marker and a second one to read the gap in ms, the frequency and the angle; right-click removes a marker.</li>
+</ol>
+<p><b>Tables</b> (<a href="#tables">details</a>)</p>
+<ol>
+  <li>In the left list, choose a table (or use the filter, or <i>Read recently</i> to see only those the firmware is reading).</li>
+  <li>Watch the orange cells (read by the CPU) and the blue dot (exact position between the cells).</li>
+  <li>To change several cells at once: select the range, right-click, then <i>Add…</i>, <i>Multiply…</i> or <i>Set…</i>.</li>
+  <li><b>Double-click a value</b> to edit it: type, <kbd>Enter</kbd>; it is written to the simulated flash and the firmware sees it at once (<i>Raw values</i> to enter the byte).</li>
+  <li>Tick <i>3D view</i> for the relief; double-click the table in the list to open it in a window and follow several at once.</li>
+</ol>
+<p><b>CPU memory</b> (<a href="#memoire">details</a>)</p>
+<ol>
+  <li>Use the zone buttons (vectors, identification, calibration, code, CAN, external RAM, internal RAM, SFR) or <i>Go to</i> an address.</li>
+  <li>With the engine running, bytes read turn orange and bytes written turn red: you immediately see which variables are alive.</li>
+  <li>Right-click a byte: memory breakpoint on write, on read or both.</li>
+</ol>
+<p><b>Hardware</b> (<a href="#puces">details</a>)</p>
+<ol>
+  <li>Choose the chip sub-tab (CPU, Flash, RAM, PLCC, EEPROM): its description, its pins and its live content.</li>
+  <li><i>Go to</i> an address or <i>Last access</i>; double-click a byte to change it (the firmware sees the new value); <i>Save… / Load…</i> to save or replace the chip content.</li>
+</ol>
+<p><b>CPU pins</b> and <b>CPU registers</b> (<a href="#broches">pins</a>, <a href="#registres">registers</a>)</p>
+<ol>
+  <li>In the pins, find the signal by its function on the board or its X6000 number; tick "Pins used by the board only" to shorten the list.</li>
+  <li>Double-click an input: toggles it; double-click an analog input AN0-AN9: sets its voltage (useful to test a sensor without the virtual engine).</li>
+  <li>In the registers, follow PC, stack, PSW and register banks during single-stepping.</li>
+</ol>
+<p><b>Interrupts</b> (<a href="#interruptions">details</a>)</p>
+<ol>
+  <li>On the left, find the source (CAPCOM, timer, ADC, serial link); the columns give the enable bit, the pending request, the priority and the number of times it has been served.</li>
+  <li>A source whose counter does not move is not armed or never fires: useful to check that a hardware event reaches the firmware.</li>
+  <li>On the right, the 8 PEC channels (automatic transfers): counter, size, source, destination.</li>
+</ol>
+
+<h3 id="emploi-code">Reading the code, naming, following execution</h3>
+<p><b>Disassembly</b> (<a href="#desassemblage">details</a>)</p>
+<ol>
+  <li>Type a hex address or a name in <i>Go to</i>; <b>&lt;</b> goes back; <b>Reset</b> goes to the entry point.</li>
+  <li>Tick <b>Follow execution</b>: the view centres itself on the current instruction, even while the CPU is running.</li>
+  <li><kbd>F7</kbd> / <kbd>F8</kbd> / <kbd>Shift</kbd>+<kbd>F8</kbd>: single-stepping; <kbd>F2</kbd> sets a breakpoint on the line; <kbd>F4</kbd> runs to the line.</li>
+  <li>Double-click a jump or a call to go there. Right-click: menu (breakpoint, run to here, set PC, rename, comment, show in graph / pseudocode).</li>
+</ol>
+<p><b>Pseudocode</b> and <b>Graph</b> (<a href="#pseudocode">pseudocode</a>, <a href="#graphe">graph</a>)</p>
+<ol>
+  <li>Choose the function in the left list (filter by name or address), or <i>Function at PC</i>, or <i>Disassembly line</i>.</li>
+  <li>In the pseudocode, the <b>H / M / B</b> marks tell how reliable each line is; <i>Assembly</i> shows or hides the original instruction.</li>
+  <li>In the graph: wheel = zoom, drag = pan, <i>Fit</i> = see everything, double-click a call = the called function; <i>Previous</i> goes back.</li>
+  <li>Tick <i>Follow execution</i> so the view accompanies the PC, and <i>Synchronise</i> so pseudocode and graph show the same function (see below).</li>
+  <li>The current instruction is always orange, and so is the current function in the list. Also tick <i>Settings &gt; Highlight explored code</i> (unticked by default): recently executed code is tinted turquoise (also in the function lists), you see the path really taken.</li>
+</ol>
+<figure><img src="images/synchro_vues.png" alt="Pseudocode and graph side by side, synchronised"><figcaption>Combined mode: the pseudocode in the main window, the graph detached next to it; the function and line chosen in one are shown in the other.</figcaption></figure>
+<p><b>Symbols</b> (<a href="#symboles">details</a>)</p>
+<ol>
+  <li>Filter by name; double-click: the address is shown in the disassembly.</li>
+  <li>Right-click: rename or comment. <i>File &gt; Save labels</i> keeps the work in the <code>data/labels</code> folder, reloaded automatically for the right software version.</li>
+</ol>
+<p><b>Renaming and commenting</b> (<a href="#labels-edition">details</a>)</p>
+<ol>
+  <li>Right-click the word (variable, function, label) in the disassembly, the pseudocode or the graph.</li>
+  <li><b>Rename…</b>: the new name appears everywhere at once. <b>Comment…</b>: free text, shown <b>on hover</b> over the word.</li>
+  <li><b>Show in graph / pseudocode / disassembly</b> switches between views on the same function.</li>
+</ol>
+<div class="deux">
+<figure><img src="images/label_menu.png" alt="Right-click menu on a pseudocode variable"><figcaption>Right-click on a variable.</figcaption></figure>
+<figure><img src="images/label_survol.png" alt="Comment shown when hovering a variable"><figcaption>The comment is shown on hover.</figcaption></figure>
+</div>
+
+<h3 id="emploi-debug">Debugging: stops and accesses</h3>
+<p><b>Breakpoints</b> (<a href="#pointsarret">details</a>)</p>
+<ol>
+  <li><b>Code</b>: enter an address or a label name, <i>Add</i>; or <kbd>F2</kbd> on a disassembly line. The <i>Active</i> box keeps the point without using it. <i>Delete</i> removes the selected one.</li>
+  <li><b>Memory</b>: enter an address (or range), read / write, optionally a value. Example: <code>E655</code> written with <code>AA</code> stops at the end of the start-up checks.</li>
+  <li>When a stop happens, the header shows <b>STOPPED: BREAKPOINT</b>; <i>Run</i> resumes. The <i>Hits</i> column counts the stops; <i>Clear all</i> resets everything.</li>
+</ol>
+<p><b>Bus access</b> (<a href="#accesbus">details</a>)</p>
+<ol>
+  <li>Set the filters <b>before</b> capturing: zone (for example <i>RAM int</i>), <i>Reads</i> / <i>Writes</i>, hex address range.</li>
+  <li>Choose the buffer size and <i>Circular</i> (the latest accesses) or <i>Stop when full</i> (the first ones after <i>Clear</i>).</li>
+  <li>Run the simulation: the <i>Instr.</i> column tells which instruction accesses; double-click it to go to the code.</li>
+</ol>
+<p><b>Log</b> (<a href="#journal">details</a>)</p>
+<ol>
+  <li>Check it when loading a full read: wrong checksums, chosen definition, label file recognised for the software version.</li>
+  <li>It also keeps hardware traps, breakpoint stops and the connection of MS41 ECU Tool.</li>
+</ol>
+
+<h3 id="emploi-com">Communicating: K-line, CAN, EWS, ECU Tool</h3>
+<p><b>K-line</b> (<a href="#kline">details</a>)</p>
+<ol>
+  <li>Start <i>Run</i> (the ECU only answers while it runs).</li>
+  <li>Type a DS2 frame in hex <b>without</b> checksum (added automatically): <code>12 04 00</code> = identification, <code>12 05 04 00</code> = fault codes.</li>
+  <li>Read the answer in the list (direction, simulated time). <i>Auto scroll</i> follows the bottom of the list.</li>
+  <li>The <b>MS41 ECU Tool</b> button opens the complete tool connected to the same line.</li>
+</ol>
+<p><b>Integrated MS41 ECU Tool</b> (<a href="#ecutool">details</a>)</p>
+<ol>
+  <li><i>Tools &gt; MS41 ECU Tool</i>: the tool opens already connected ("MS41 Simulator (USB)", 9600 baud); the simulation switches to real time and Run must be started.</li>
+  <li>Open the communication <b>at idle</b> (above 2000 rpm the ECU ignores the request), then identification, fault codes, live data, actuator tests.</li>
+  <li>To read or write the flash in Fast mode, the engine must be <b>stopped</b>; turn the ignition off and on (Virtual engine tab) to leave service mode.</li>
+  <li>After a write: <i>File &gt; Save modified binary…</i>.</li>
+</ol>
+<p><b>CAN</b> (<a href="#can">details</a>)</p>
+<ol>
+  <li>The table shows the last frame of each identifier (DME1, DME2, DME4), decoded.</li>
+  <li>Tick <b>Other ECUs on the bus</b> so frames are acknowledged; <b>CAN H / CAN L short circuit</b> causes a bus-off.</li>
+  <li>For an automatic gearbox: tick <b>Automatic gearbox (EGS)</b>, set the gear code and the torque reduction, then turn the ignition off and on (the ECU only detects the gearbox at power-up).</li>
+</ol>
+<p><b>EWS</b> (<a href="#ews">details</a>)</p>
+<ol>
+  <li>By default <b>AUTOMATIC EWS</b> is ticked: starting is always allowed.</li>
+  <li>To test a refusal: untick it, <i>Write</i> another ISN (or <i>EWS from another car</i>), then turn the ignition off and on: starting is refused and code 209 is set.</li>
+  <li>The exchange log shows every message (ISN sent, ISN expected, result); the <i>EWS unplugged</i> and <i>corrupted checksum</i> faults give code 18.</li>
+</ol>
+
+<h3 id="emploi-fen">Windows and menus</h3>
+<ul>
+  <li><b>Separate windows</b> (<a href="#fenetres">details</a>): double-click a tab (or right-click &gt; <i>Open in a separate window</i>, or the <i>Windows</i> menu); the tab stays marked ↗. To dock it back: close the window, or <i>Dock here</i>. Positions are restored at the next launch.</li>
+  <li><b>Interface modes</b> (<a href="#modes">details</a>): <i>Interface mode</i> chooses the tabs shown, from <i>Extra simple</i> (engine, curves, timing diagrams, K-line) to <i>Advanced</i> (everything).</li>
+  <li><b>Settings</b> (<a href="#menus">details</a>): engine sound (mute, volume, exhaust), dark or light theme, <a href="#manette">Gamepad…</a> to drive the engine with a gamepad, <a href="#mcp">MCP server</a> to drive the simulator from Claude.</li>
+  <li><b>Toolbar</b> (<a href="#execution">details</a>): Reset, Step (with the number of instructions per step), Step over, Step out, Run, Pause; simulation speed on the right (real time, max, 1/10 to 1/1000).</li>
+</ul>
+
+<h2 id="fenetre">The main window</h2>
+<figure>
+  <img src="images/fenetre_principale.png" alt="Main window of the simulator, engine running">
+  <figcaption>Main window, virtual engine at idle.</figcaption>
+</figure>
+<ol class="reperes">
+  <li><b>Menus</b>: File, Simulation, Tools, Windows, Settings, Help (see <a href="#menus">Menus and shortcuts</a>).</li>
+  <li><b>Header</b>: loaded calibration (part number and index), simulated time and simulation status pill (see <a href="#theme">Appearance</a>).</li>
+  <li><b>Toolbar</b>: loading, Reset, Step (with the number of instructions per step), Step over, Step out, Run, Pause.</li>
+  <li><b>Speed</b> of the simulation in Run: <i>real time</i> (12 MHz, simulated time follows the clock), <i>max</i> (as fast as possible) or slowed (1/10 to 1/1000, to follow the signals by eye).</li>
+  <li><b>Simulated time</b> and execution speed (millions of instructions per real second).</li>
+  <li><b>Disassembly</b> of the firmware around the current instruction.</li>
+  <li><b>CPU registers</b>: PC, IP, CSP, PSW, stack, register bank…</li>
+  <li><b>CPU pins</b>: state of each pin, frequency and duty cycle of the signals, analog voltages.</li>
+  <li><b>Bottom tabs</b>: each can open in its own window (double-click the tab).</li>
+  <li><b>Status bar</b>: loaded file, format (raw / CPU view), calibration part number and index.</li>
+</ol>
+
+<h3 id="modes">Interface modes</h3>
+<p><b>Interface Mode</b> menu: four levels, from the simplest to the complete software. The choice is kept from one launch to the
+next; the simulation keeps running while it changes.</p>
+<ul>
+  <li><b>Extra simple</b>: for playing with the engine. Only the <i>Virtual engine</i>, <i>Timing diagrams</i>,
+      <i>Curves</i> and <i>K-line</i> tabs, which fill the whole window; no disassembly, no registers, no pins, no
+      step-by-step buttons.</li>
+  <li><b>Simple</b>: without disassembly, pseudocode or graph (nor CPU memory, symbols, bus access, breakpoints,
+      interrupts); the pin states, hardware, sensors, tables, CAN, EWS and log are kept.</li>
+  <li><b>Normal</b>: everything except the pseudocode and the graph.</li>
+  <li><b>Advanced</b>: the complete software (default mode).</li>
+</ul>
+<p>A hidden tab opened in a separate window is returned to the main window; the <b>Windows</b> menu
+lists only the tabs shown. <b>Speed</b>: at launch, the simulation is in <i>real time</i>; in the
+<i>extra simple</i> and <i>simple</i> modes it is always in real time and the speed selector is hidden; in the
+<i>normal</i> and <i>advanced</i> modes the selector stays available (max, 1/10, 1/100, 1/1000).</p>
+<p><b>Resources</b>: what is not shown does not work. A hidden tab (another tab selected, or removed by the
+interface mode) is not redrawn and not updated; it updates as soon as it reappears again. The tracking of
+read cells (<i>Tables</i> tab), the activity of the units (<i>Hardware</i>, <i>CPU memory</i>) and the access log
+(<i>Bus access</i>) only watch memory while their tab (or its separate window) is shown:
+without them, the program's memory accesses cost nothing extra. The <i>Curves</i> and the <i>Timing diagrams</i>, on the other hand,
+<b>always record</b>, even hidden: when you return to them, you find what happened in the meantime. The lines
+of the <i>K-line</i> also wait and show up on return.</p>
+
+<h3 id="theme">Appearance: dark or light theme</h3>
+<p>By default, the simulator has the look of <b>MS41 ECU Tool</b>: dark background, panels as rounded cards whose
+title is in blue underlined capitals, flat buttons, selected tab as a blue pill, light text. States keep
+their colors: green for what is going well (engine started, diagnostic byte accepted), orange for attention
+(light, read bytes), red for an error or a write. At the top, a <b>header</b> recalls the loaded calibration
+(part number and index), the simulated time and the simulation status in a pill: <b>RUNNING</b> (green),
+<b>STOPPED</b> (gray) or <b>STOPPED: BREAKPOINT</b> (orange). The <b>Run</b> button is blue.</p>
+<p><b>Settings &gt; Theme</b>: <i>Dark (MS41 ECU Tool style)</i> or <i>Light (system look)</i>, the previous
+appearance (without header). The choice is kept and applied at the next launch. The screenshots in this guide are made
+with the dark theme.</p>
+
+<h2 id="execution">Running the firmware</h2>
+<table>
+  <tr><th>Command</th><th>Shortcut</th><th>Effect</th></tr>
+  <tr><td>Reset</td><td></td><td>Power-up and CPU reset (RAM cleared).</td></tr>
+  <tr><td>Step</td><td><kbd>F7</kbd></td><td>Executes 1 instruction (or the number chosen next to it: ×10 … ×100 000).</td></tr>
+  <tr><td>Step over</td><td><kbd>F8</kbd></td><td>Executes the instruction; a function call is executed in full.</td></tr>
+  <tr><td>Step out</td><td><kbd>Shift</kbd>+<kbd>F8</kbd></td><td>Executes until the current function returns.</td></tr>
+  <tr><td>Run</td><td><kbd>F9</kbd></td><td>Continuous execution until Pause, a breakpoint or a hardware trap.</td></tr>
+  <tr><td>Pause</td><td><kbd>F6</kbd></td><td>Stops execution.</td></tr>
+  <tr><td>Run to line</td><td><kbd>F4</kbd></td><td>Run to the selected disassembly line.</td></tr>
+  <tr><td>Breakpoint on line</td><td><kbd>F2</kbd></td><td>Sets or removes a breakpoint on the selected line.</td></tr>
+</table>
+<p>These shortcuts also work in the separate windows.</p>
+
+<h3 id="desassemblage">Disassembly</h3>
+<figure><img src="images/desassemblage.png" alt="Disassembly panel"></figure>
+<ul>
+  <li><b>Go to</b>: a hex address (<code>430</code>, <code>0x20000</code>) or a label name; <b>&lt;</b> goes back; <b>Reset</b> goes to the entry point.</li>
+  <li><b>DPP</b>: pages used to translate the 16-bit memory addresses (live CPU values, or values after initialization).</li>
+  <li><b>Double-click</b> a line: follows the jump or call, or shows in the Memory tab the data accessed.</li>
+  <li><b>Right-click</b>: breakpoint here (<kbd>F2</kbd>), run to here (<kbd>F4</kbd>), place the PC here.</li>
+  <li>The <i>Comment</i> column gives the target of the jumps and the current value of the variables read (region and contents).</li>
+</ul>
+
+<div class="deux">
+<div>
+
+<div class="deux">
+<div>
+<h3 id="registres">CPU registers</h3>
+<figure><img src="images/registres.png" alt="Registers panel"></figure>
+<p>Instruction and cycle counters, simulated time, CPU state (EINIT = initialization finished), then the
+registers with their decoding (PSW flags, interrupt level, stack, register bank).</p>
+</div>
+<div>
+<h3 id="broches">CPU pins</h3>
+<figure><img src="images/broches.png" alt="CPU pins panel"></figure>
+<p>For each pin: direction (E input / S output), latch, level, and for the signals that change their
+<b>frequency and duty cycle</b> (coils, injectors, idle valve, VANOS…), with the function and the
+number on the X6000 connector. <b>Double-click</b>: toggles an input or sets an AN0-AN9 voltage.
+The list contains <b>all the pins of the SAB 80C166W</b> with their number on the package: ports P0 (bus) to P5, and
+special pins (crystal, bus configuration, reset, NMI, converter reference, power supplies). The
+<i>CPU function</i> column gives the function intended by the datasheet, the last column the use on the board; the pins the
+board does not use are in gray. "Pins used by the board only" hides the others.</p>
+</div>
+</div>
+
+<h2 id="puces">The board's chips</h2>
+<p>The simulator reproduces the ECU board chip by chip. The <b>Hardware</b> tab at the bottom of the window has a
+sub-tab per unit: <b>CPU SAB 80C166W</b>, <b>Flash 28F200</b>, <b>RAM U21 (6264)</b>, <b>PLCC U22 (PALCE16V8)</b>
+and <b>EEPROM 24C04</b>. The CAN controller and the satellite have no sub-tab: they are followed in their tabs
+(<a href="#can">CAN</a>, <a href="#capteurs">Sensors</a>, <a href="#ews">EWS</a>).</p>
+<p>Each sub-tab has three parts:</p>
+<ul>
+  <li><b>What is emulated</b>: what the simulator reproduces of the chip, and what it does not reproduce.</li>
+  <li><b>Pins</b>: number (when the package is known), name, direction, state and function on the board. The bus pins
+      show the state of the chip's <i>last cycle</i> (address, data, read or write); the others are live.</li>
+  <li><b>Live contents</b>: the bytes <span style="background:#d68018;color:#fff">read</span> by the program turn
+      orange, those <span style="background:#d63c3c;color:#fff">written</span> red, and the color fades in 2 s (only
+      data reads are colored, not the code read). <i>Go to</i> an address, <i>Last access</i>: the byte
+      touched last. <b>Double-click</b>: edit a byte, as with an external programmer (the firmware sees the
+      new value). <i>Save… / Load…</i>: the chip's contents in a file.</li>
+</ul>
+
+<h3 id="puce-cpu">CPU Siemens SAB 80C166W</h3>
+<figure><img src="images/materiel_cpu.png" alt="Hardware, CPU view: description, PC, SP, last access and internal RAM"></figure>
+<p>The ECU's 16-bit processor (MQFP-100 package, 12 MHz). It runs the firmware read from the full read,
+instruction by instruction.</p>
+<ul>
+  <li><b>Emulated</b>: complete instruction set, registers and register banks (CP), PSW, stack, interrupts and
+      PEC transfers, GPT1 / GPT2 timers, 16-channel CAPCOM (capture and compare on the pins), 10-channel analog
+      converter, ports P0 to P5, serial links ASC0 (K-line) and ASC1 (satellite), watchdog, external bus (flash in
+      16-bit, RAM and CAN in 8-bit). Time is counted in CPU states per instruction.</li>
+  <li><b>Not emulated</b>: exact bus wait states, power consumption.</li>
+  <li><b>Hardware view</b>: program counter, stack, last access, and the <b>internal RAM</b> (0xFA00-0xFDFF: registers
+      R0-R15 of the banks, stack, firmware variables).</li>
+  <li><b>Elsewhere</b>: <a href="#desassemblage">disassembly</a>, <a href="#registres">registers</a>,
+      <a href="#broches">CPU pins</a> (all the package pins, live), <a href="#interruptions">interrupts</a>,
+      <a href="#memoire">memory as the CPU sees it</a>, <a href="#pseudocode">pseudocode</a>.</li>
+</ul>
+
+<h3 id="puce-flash">Flash Intel 28F200</h3>
+<figure><img src="images/materiel_flash.png" alt="Hardware, view of the 28F200 flash"></figure>
+<p>The program and calibration memory: 256 KB in 16-bit words, boot block at the bottom (blocks of 16, 8, 8,
+96 and 128 KB).</p>
+<ul>
+  <li><b>Emulated</b>: contents in the chip's order, command interface (read, status register, identifiers,
+      word programming, block erase), programming voltage <b>VPP commanded by P2.6</b> (without it, the
+      programming fails). The chip's A13 line is recomputed by the PLCC decoder: CPU address = chip address
+      XOR 0x4000 (<i>Chip</i> and <i>CPU</i> columns of the view).</li>
+  <li><b>Not emulated</b>: programming and erase times (instantaneous), endurance. Package and pin numbers
+      not surveyed on the board (signals only).</li>
+  <li><b>Program the flash</b>: as on the car, over the K-line with <a href="#ecutool">MS41 ECU Tool</a>, or
+      directly in the view (double-click, <i>Load…</i>). <i>File &gt; Save the modified binary…</i> recovers the
+      result in a file.</li>
+</ul>
+
+<h3 id="puce-ram">RAM UM6264A (U21)</h3>
+<figure><img src="images/materiel_ram.png" alt="Hardware, view of the 6264 RAM"></figure>
+<p>The 8 KB external RAM where the firmware keeps its variables, addressed by byte.</p>
+<ul>
+  <li><b>Emulated</b>: selection by the PLCC decoder (pin 13), window 0xD800-0xF7FF on an 8-bit bus (a word access = two
+      byte cycles), read and write. The contents are set to 0 at power-up (a real RAM starts with
+      arbitrary contents; the firmware initializes it).</li>
+  <li><b>Not emulated</b>: access time, retention without power (the contents are lost when the ECU
+      is turned off, see <a href="#contact">Ignition</a>).</li>
+  <li><b>Pinout</b>: standard 6264, 28 pins (CE2 not surveyed on the board).</li>
+</ul>
+
+<h3 id="puce-plcc">PALCE16V8 address decoder (U22)</h3>
+<figure><img src="images/materiel_plcc.png" alt="View of the PLCC U22 decoder: pins, equations and memory map"></figure>
+<p>The central address decoder: from the CPU's address bits, it selects the chip that responds (flash, CAN or RAM).
+The view gives the state of its 20 pins for the last address presented on the external bus, its equations and the memory
+map that results (flash, CAN 0xD000-0xD7FF, RAM 0xD800-0xF7FF, regions with no chip).</p>
+<ul>
+  <li><b>Emulated</b>: the four equations surveyed on the chip: flash selection, flash A13 line (recomputed),
+      CAN selection, RAM selection.</li>
+  <li><b>Not emulated</b>: pins 1, 9, 12, 17, 18 and 19 (no effect on the board), propagation time.</li>
+</ul>
+<p><b>Editable equations</b>: the four outputs (pins 16, 15, 14, 13) are written with the inputs <code>I1</code> to
+<code>I8</code> (I1 = A16, I2 = A14, I3 = A15, I4 = A12, I5 = A13, I6 = A11, I7 = A17, I8 held at 1), <code>/</code> for "not",
+<code>.</code> for "and", <code>+</code> for "or", parentheses, and the constants 0 and 1. <b>Program</b> loads the
+equations into the chip: the simulator's bus decodes with them at once (a wrong equation is refused with the
+reason). The memory map updates. Equations different from the survey can prevent the firmware from finding
+its flash, its RAM or the CAN: a confirmation is requested. <b>Board survey</b> restores the original equations;
+<b>Save… / Load…</b>: text file, one line per pin (<code>14 = /I2+/I3+/I4+I5+I6+I7+I1</code>).
+The modified equations last only for the session: the survey comes back at the next launch.</p>
+
+<h3 id="puce-eeprom">EEPROM 24C04</h3>
+<figure><img src="images/materiel_eeprom.png" alt="Hardware, view of the 24C04 EEPROM"></figure>
+<p>The 512-byte I²C serial EEPROM (2 blocks of 256) where the ECU keeps what must survive turning off the
+ignition: adaptations, fault memory, VANOS rest position…</p>
+<ul>
+  <li><b>Emulated</b>: bit-by-bit protocol on <b>P3.3 (SCL)</b> and <b>P3.12 (SDA)</b>, address and block bit, internal
+      pointer, byte and page write (16 bytes), current, random and sequential reads, acknowledgements.
+      The bottom line gives the state machine's state, the pointer and the counters.</li>
+  <li><b>Not emulated</b>: write time (≈ 5 ms, immediate here), write protection (pins A1, A2 and WP not surveyed).</li>
+  <li><b>Contents</b>: blank by default (all FF), or loaded from a file: menu <i>File &gt; Simulated EEPROM</i>
+      (see <a href="#contact">Ignition, post-run and EEPROM</a>).</li>
+</ul>
+
+<h3 id="puce-can">CAN controller SAE81C91</h3>
+<p>The engine CAN bus controller, wired to the CPU's external bus (window 0xD000-0xD7FF, selected by the PLCC decoder).
+The firmware writes the DME1, DME2 and DME4 frames there and reads those of the automatic transmission there.</p>
+<ul>
+  <li><b>Emulated</b>: registers and message buffers as the firmware uses them, transmission every 10 ms,
+      acknowledgement by the other ECUs, error-passive when the ECU is alone, bus-off on a short circuit.</li>
+  <li><b>Where to see it</b>: <a href="#can">CAN</a> tab (decoded frames, options), <i>CAN</i> region of the
+      <a href="#memoire">CPU memory</a> tab.</li>
+</ul>
+
+<h3 id="puce-satellite">ST9 satellite</h3>
+<p>The board's second microcontroller, linked to the CPU by the ASC1 serial link. It measures the air temperature, the
+knock sensors and the A/C inputs, commands the compressor relay, relays the messages of the EWS
+immobilizer and monitors the output stages.</p>
+<ul>
+  <li><b>Emulated as a black box</b>, from the messages the firmware expects (its own program was not read):
+      synchronization and configuration, air temperature (message 0x108), knock (gain received in 0x101, cylinder
+      level returned in 0x102), A/C and compressor relay, EWS messages 0x109, diagnostics of the 24 output
+      stages (always without fault).</li>
+  <li><b>Where to see it</b>: cards of the <a href="#capteurs">Sensors</a> tab (air temperature, knock, A/C),
+      <a href="#cliquetis">Knock</a>, <a href="#ews">EWS</a> tab; simulated fault "ST9 satellite unplugged" (code 100).</li>
+</ul>
+
+<h2 id="onglets">The bottom tabs</h2>
+<p>The <b>Hardware</b> tab is described with <a href="#puces">the board's chips</a>.</p>
+
+<h3 id="memoire">CPU memory</h3>
+<figure><img src="images/memoire.png" alt="CPU memory tab"></figure>
+<p>Hexadecimal view of the whole addressable space <b>as the CPU sees it</b>: flash (in CPU order), CAN controller,
+external RAM, internal RAM, SFR registers, regions with no chip. It complements the Hardware tab, which
+shows <a href="#puces">each chip</a> separately. The buttons jump to the useful regions: interrupt vectors, identification,
+calibration, code, CAN, external RAM, internal RAM, SFR. The background color indicates the region; the bytes
+<span style="background:#d68018;color:#fff">read</span> and <span style="background:#d63c3c;color:#fff">written</span> by the program are colored
+live during execution (the color fades in 2 s). <b>Right-click</b> on a byte: memory breakpoint on
+write, on read or both.</p>
+
+<h3 id="capteurs">Sensors: characteristics of each sensor</h3>
+<figure><img src="images/capteurs.png" alt="Sensors tab, crankshaft card with the drawing of the trigger wheel"></figure>
+<p>The <b>Sensors</b> tab describes the hardware that turns a physical quantity into a signal for the ECU, and
+lets you modify it to simulate another sensor. The live values and the curves are not here: they are
+in the Virtual engine tab and in the Curves. Fifteen cards on the left: crankshaft (TDC trigger wheel), camshaft,
+HFM air meter, throttle (potentiometer), coolant temperature, air temperature, vehicle speed, lambda sensors,
+knock sensors, ignition feedback, battery, idle valve, injectors, camshafts, A/C pressure. Each card gives:</p>
+<ul>
+  <li>the sensor's <b>principle</b> and its path to the ECU (pin, analog input or satellite);</li>
+  <li>its <b>part number</b> and its <b>characteristics</b>. The BMW part numbers of the M52's parts (and
+      of the US M3 S52 when it differs) are pre-filled with the characteristics published by the parts catalogs
+      and the manufacturers (for example crankshaft sensor 12141703277 Hall-effect, Siemens air meter 5WK9600,
+      Bosch injector 0 280 150 440 of 14.5 Ω); "not published" when no source was found. The two fields can be edited and are kept from one launch to the
+      next;</li>
+  <li>when the sensor is adjustable, its <b>electrical characteristics</b>: <i>Apply</i> takes them into account
+      right away, <i>Original</i> restores those of the BMW sensor.</li>
+</ul>
+<p><b>Crankshaft</b>: number of teeth on the trigger wheel and number of missing teeth, with the drawing of the trigger wheel (teeth,
+gap in red, sensor position, tooth 0), and the sensor type: <b>Hall effect</b> (square 0-5 V signal, present even
+at rest) or <b>inductive</b> (alternating voltage whose amplitude grows with the engine speed; amplitude for 1000 rpm and
+input threshold adjustable). A table cross-references the two types with the chosen trigger wheel: signal, amplitude, minimum engine speed
+detected, edges used, supply, angular pitch, gap width. The inductive sensor's values are a model
+(not measured). The MS41 firmware expects a 60-2 trigger wheel: with another trigger wheel it does not synchronize and the engine
+does not start, as on the car; with an inductive sensor whose threshold is too high, there is no longer any signal
+at starter engine speed.</p>
+<figure><img src="images/capteurs_papillon.png" alt="Throttle card: terminals and law of the potentiometer"></figure>
+<p><b>Throttle</b>: voltage throttle closed and wide open, and the law of the potentiometer: <b>linear</b>,
+<b>logarithmic</b> (10 % of the electrical travel at half-travel) or <b>anti-logarithmic</b>; the graph shows
+the voltage versus the opening. <b>Vehicle speed</b>: pulses per km. <b>Air meter, coolant and air temperatures</b>:
+the sensor's curve in an editable table (add / remove points; the physical quantity must increase
+strictly), and the air meter voltage with no flow. The original curves come from the ID41 calibration, which
+describes the sensors fitted by BMW.</p>
+<p>These settings are kept from one launch to the next. When one of them differs from the original, the status bar of the tab
+shows <b>SENSORS MODIFIED</b>; <i>Reset everything to original</i> returns to the BMW sensors (part numbers and texts
+kept).</p>
+
+<h3 id="tables">Tables</h3>
+<figure><img src="images/tables.png" alt="Tables tab with the base timing map"></figure>
+<ul>
+  <li>On the left, the tables of the RomRaider definition, by category. <b>Filter</b> to search by name;
+      <b>Read recently</b> keeps only the tables the firmware is currently reading.</li>
+  <li>On the right, the chosen table with its axes. The <b>cells read by the CPU are highlighted in orange</b>, live:
+      you see the operating point move when the engine speed or the load change. <b>Raw values</b> shows
+      the bytes instead of the converted values.</li>
+  <li>Below the table, the description (role, firmware routine that reads it).</li>
+  <li><b>Blue dot</b> (2D and 3D tables): the <b>exact</b> position where the firmware is, which moves
+      between the rows (and between the columns in 3D). Below the title: the firmware's input value in the units of
+      each axis (for example <i>Battery Voltage = 14.1 Volts</i>) and the table value linearly interpolated at that
+      point. Where this position comes from: to find its interval, the firmware compares its input value, in a
+      register, with the axis points (<code>CMP</code> / <code>CMPB</code> instruction that reads the axis in memory). The simulated
+      CPU reads that register at the moment of the comparison: no analysis of the program, no label, only what the
+      instruction does. It is the firmware's value (measured engine speed, converted voltage...), which may differ a little from the
+      physical value of the virtual engine. Gray dot: no new comparison for 0.5 s; no more dot after 2 s.</li>
+  <li><b>3D view</b> (3D tables only, disabled by default): the table in relief beside the grid, with its
+      three graduated axes and their names in the cartouche at the top left. <b>Drag</b>: rotate it;
+      <b>wheel</b>: zoom; <b>double-click</b>: starting view. The cells read by the CPU are marked in orange and a
+      <b>vertical arrow drops onto the surface</b> at the exact point (same position as the blue dot), with the input
+      values of the two axes. If the axes have not been compared (table read otherwise), it aims at the center of the cells read
+      together (usually a 2 × 2 square). A read of the whole table (flash check) does not move it.</li>
+  <li><b>Edit a value</b>: <b>double-click</b> a grid cell (data, or an axis point when the axis is in flash), type the value in the displayed units (decimal comma or point), <kbd>Enter</kbd>: it is written to the simulated flash, and the displayed value is the nearest byte (definitions have no inverse formula); <kbd>Esc</kbd> cancels. With <i>Raw values</i> ticked you enter the byte itself. The firmware sees the new value immediately; <i>File &gt; Save modified binary…</i> keeps it in a file (the original is never overwritten). 32-bit tables, switches and static axes cannot be edited here.</li>
+  <li><b>Edit a range</b>: select several cells (drag, or <kbd>Shift</kbd> + click; axis points are not affected), then <b>right-click</b>:
+      <b>Add…</b> adds a constant to every selected cell, <b>Multiply…</b> multiplies them by a constant, <b>Set…</b> gives them all the same value.
+      The constant is typed in the displayed units (or as bytes with <i>Raw values</i> ticked); each result is brought to the nearest byte and <b>limited to the range of the type</b> (0 to 255 for an unsigned byte, for example), and the number of modified cells is shown under the title. Nothing is written if the input is invalid. Same write as the double-click: simulated flash only, never the original file.</li>
+  <li><b>Open in a window</b> (or double-click the table in the left list): the table in its own window, to follow several at once.</li>
+</ul>
+
+<figure><img src="images/tables_zone.png" alt="Right-click menu on a selected range of cells: Add, Multiply, Set"><figcaption>Selected range and right-click menu.</figcaption></figure>
+
+<figure><img src="images/tables_3d.png" alt="3D view of the base injection table, arrow on the cells read at idle"></figure>
+
+<h3 id="moteur">Virtual engine</h3>
+<figure><img src="images/moteur_virtuel.png" alt="Virtual engine tab"></figure>
+<ol class="reperes">
+  <li><b>Connect the virtual engine</b> to the ECU pins (sensors as inputs, actuators measured as outputs).
+      It is connected at the simulator's launch, in <i>Free engine (model)</i> mode.</li>
+  <li><b>Start</b>: does everything needed for the engine to start (connects the engine, launches Run, switches to free engine,
+      cranks the starter until the engine holds on its own; gives up after 5 s with the reason).</li>
+  <li><b>Starter (hold)</b>: starter cranked as long as the button is held. When cold, you must hold 1.5 to 3 s,
+      as on a real car.</li>
+  <li><b>Turn off the ignition</b>: cuts the +15, like the key: the ECU stops the engine, keeps the main relay
+      a few seconds (post-run, EEPROM save) then turns off (see <a href="#contact">Ignition, EEPROM</a>).</li>
+  <li><b>Ignition (+15)</b>: key state; re-checking powers the ECU back up (RAM lost, EEPROM re-read, new EWS exchange).</li>
+  <li><b>Mode</b>: <i>Stopped</i>, <i>Starter</i> (fixed engine speed of 220 rpm), <i>Fixed RPM</i> (the slider sets the engine speed,
+      handy for exploring the tables), <i>Free engine</i> (engine speed results from the combustions and the friction).</li>
+  <li><b>Engine</b> mounted on the dyno: M52B20, B25, B28, S52B32 (M3 E36 US) or the <i>custom</i> engine (displacement, filling, friction).</li>
+  <li><b>Injectors</b> fitted: Bosch 0 280 150 415 (green), 440 (pink), <b>M3 3.2 US S52</b> (BMW 13641703819) or <i>custom</i>, with their real flow and dead time. The US M3 injector is the same part as the 440 of the M52B28 (Bosch 0 280 150 440): same flow and dead time; it is chosen by default with the S52B32 engine.</li>
+  <li><b>Engine settings…</b>: opens the <a href="#fenetremoteur">Engine window</a> (cards of the M52s, custom engine and injectors, atmospheric pressure, fuel pressure, VANOS retard). Below it: <b>Power dyno…</b> (<a href="#banc">dyno</a>). The immobilizer has its own tab, <a href="#ews">EWS</a>.</li>
+  <li><b>Injectors of the map</b>: recognized by its dead-time table. If those fitted differ, the expected
+      mixture offset is shown (e.g. "mixture leaner by 24 %").</li>
+  <li><b>Start result</b> (time taken, or reason for the failure).</li>
+  <li><b>Sensors</b>: fixed engine speed, throttle, coolant and air temperatures, vehicle speed, external load
+      (transmission…), battery, <b>A/C pressure</b>; automatic warm-up, automatic battery,
+      <b>A/C requested</b>.
+      <br>Air conditioning: depending on the coding of the map, the ECU reads either the pressure sensor
+      (above 5.7 bar: A/C idle; above 9.6 bar: compressor; beyond 24 bar: cutoff),
+      or the "A/C requested" inputs. When it allows the compressor, the satellite latches the relay,
+      the compressor takes torque from the engine (<b>A/C compressor</b> line of the readings) and bit 6 of DME1
+      goes to 1 in the CAN tab. With the throttle flat out, the ECU cuts it for about 4 s. The resting pressure is 5 bar.
+      <br><b>Secondary air</b> (US versions, MS41.1/MS41.2 maps like the ID12 M3): after a cold start
+      (−10 to 40 °C), the ECU latches the pump relay (pin 35) and opens the flap's vacuum valve
+      (pin 62), both driven by the satellite; an electric pump blows air into the two manifolds
+      for about 2 minutes ("~90 s" in BMW training ST055). This air leans the gases seen by the upstream sensors
+      (λ ≈ 1.1-1.5 instead of 0.7-0.9): this is how the ECU checks the system. It also oxidizes the unburned gases if
+      the manifold is hot enough (afterburning). The <b>Secondary air in working order</b> box, unchecked, simulates
+      a failed pump or valve. <b>Secondary air</b> line of the readings: relay, valve and air flow blown. The
+      European maps (ID41) never command the secondary air.</li>
+  <li><b>Simulated faults</b>: cut sensor (crankshaft, camshaft, air meter, throttle, temperature, lambda sensors,
+      speed, ignition feedback), HFM hardware fault, ABS/ASC signals, satellite unplugged, EEPROM absent,
+      EWS silent or from another car, <b>VANOS stuck</b> at rest or advanced (code 212). Useful for triggering the fault codes.</li>
+  <li><b>Knock</b> (below the sensors): fuel (91, 95, 98 or 100 RON), natural engine knock, knock
+      induced on one cylinder or on all (intensity as a multiple of the engine noise, frequency in % of the cycles),
+      sensor 1 (cylinders 1-2-3) or sensor 2 (cylinders 4-5-6) unplugged. See <a href="#cliquetis">Knock</a>.</li>
+  <li><b>Engine values and firmware readings</b>, side by side: engine speed, air, lambda, temperature, timing,
+      idle valve, VANOS, tachometer, relay, light, A/C compressor, active faults, torque, secondary air…</li>
+  <li><b>Diagnosis</b> in plain language: "the engine is running", or what prevents it (immobilizer, lost
+      synchronization, no injection, flooded mixture, starter released too early…).</li>
+  <li><b>Actuators per cylinder</b>, measured on the pins: injection duration, injection end, coil charge,
+      timing, lambda of the last cycle, number of combustions, and for knock: margin to the knock limit,
+      number of knocking combustions, level measured by the sensor, retard decided by the firmware.</li>
+</ol>
+
+<h4 id="cliquetis">Knock</h4>
+<figure><img src="images/cliquetis.png" alt="Knock on 91 RON, full load at 3000 rpm: firmware retard in a sawtooth"></figure>
+<p>Knock follows the same path as on the car: the engine knocks, the <b>sensor</b> transmits it to the
+<b>satellite</b>, which measures each cylinder during the window opened by the ECU (<code>P3.6</code>, from 0 to 60°
+after TDC) and returns a level (message <code>0x102</code>). It is the <b>firmware</b> that compares this level to its
+reference, retards the timing of the knocking cylinder, then brings it back little by little.</p>
+<ul>
+  <li><b>Natural knock</b>: the engine knocks when the applied timing exceeds its knock limit, which
+      drops with the load, the air and water temperature, a low octane rating, a lean mixture or a stronger
+      compression, and rises with the engine speed. The combustions vary from one cycle to the next: knock is
+      intermittent. Original engine on 95: a few retards of 1 to 2° at full load around 3000 rpm; on 91,
+      retard of 8 to 10°; on 98, none.</li>
+  <li><b>Induced knock</b>: added to the natural knock, on the chosen cylinder. Only that cylinder is retarded.</li>
+  <li><b>Sensor unplugged</b>: the satellite now receives only electrical noise for its three cylinders; the
+      firmware memorizes code 57 (sensor 1) or 59 (sensor 2).</li>
+  <li><b>Curves</b> per cylinder: <i>Engine knock</i> (intensity of each combustion), <i>Knock margin</i>,
+      <i>Knock sensor level</i> (value returned by the satellite), <i>Firmware knock retard</i>.
+      On the screenshot: on 91 RON, each knock peak backs the timing off one notch, which climbs slowly back up to the
+      next knock.</li>
+</ul>
+<p><b>What is a model</b>: the engine's knock limit and the satellite's internal processing (level scale,
+mechanical noise) are not measured on the car; they are tuned for realistic behavior.</p>
+
+<h3 id="chronogrammes">Timing diagrams</h3>
+<figure><img src="images/chronogrammes.png" alt="Timing diagrams tab"></figure>
+<p>The logic signals on the pins, as on a logic analyzer: 60-2 crankshaft and camshaft, coils,
+injectors (firing order 1-5-3-6-2-4), ignition feedback, tachometer, idle valve, VANOS, light, knock
+window (P3.6). <b>Window</b>: duration shown (500 ms by default: about three engine cycles at idle);
+<b>Lock to cyl. 1 TDC</b> (checked by default): the end of the window is locked to the last TDC of cylinder 1, the image
+stays stable; <b>Freeze</b>: stops the scrolling; <b>Channels…</b>: choice of signals. Hovering the mouse only
+draws a vertical line: it does not move the image.</p>
+<p><b>Markers</b> (simulation paused or <i>Freeze</i> checked): a click places a marker, snapped to the edge closest to
+the clicked channel; a right-click removes the closest marker; <i>Clear the markers</i> removes them all (8 at most).
+Below the plot: the gap between successive markers, the corresponding frequency and the crank angle (at the engine speed measured
+in the window, one camshaft edge per turn). Example: two rising edges of the tachometer at 900 rpm are spaced
+22.2 ms apart, i.e. 45 Hz (3 pulses per turn).</p>
+
+<h3 id="courbes">Curves</h3>
+<figure><img src="images/courbes.png" alt="Curves tab during two throttle blips"></figure>
+<ol class="reperes">
+  <li><b>Channels shown</b>: sensors in physical value, voltages on the ECU pins (AN0-AN9),
+      engine and actuators, <b>per-cylinder channels</b> (injection, timing, coil charge, lambda of each combustion,
+      engine knock, knock margin, sensor level, firmware knock retard, cylinders 1 to 6), values read in the firmware's RAM. The choice is remembered.</li>
+  <li><b>Duration shown</b>: from 5 s to 10 min of simulated time (the recording keeps the last 10 minutes, one point every 10 ms).</li>
+  <li><b>Freeze the display</b> to read calmly; the recording continues. <i>Auto scale</i> adjusts each
+      track to the values shown (otherwise: fixed range of the channel). The pin voltages (0 to 5.2 V, full scale of the
+      converter) and the battery (0 to 16 V) always keep their scale, marked <i>(fixed)</i>.
+      <i>Cylinders overlaid</i>: the checked cylinders of the same quantity on a single track, one color per cylinder,
+      with the value of each one.</li>
+  <li><b>Export CSV</b>: the whole recording, all the channels (separator <code>;</code> and decimal comma: opens directly in Excel).</li>
+  <li><b>Tracks</b>: one per channel, with its own scale and its current value. When hovering with the mouse, a
+      cursor gives the value of all the tracks at the pointed instant.</li>
+</ol>
+<p>On the screenshot: two throttle blips. You see the engine speed rise, the air and the air meter voltage follow, the
+idle valve close, then the injection cutoff on deceleration (lambda at maximum).</p>
+
+<h3 id="pseudocode">Pseudocode</h3>
+<figure><img src="images/pseudocode.png" alt="Pseudocode tab: structured FaultDetection_MasterDispatcher, with confidence levels"></figure>
+<p>The <b>Pseudocode</b> tab translates a firmware function into pseudo-C, line by line, with the original instruction on the
+right. It is produced by the simulator's disassembler (not by IDA). Enter an address or a label, or use
+<b>Function at PC</b> (the function currently executing) or <b>Disassembly line</b> (the line selected at the top),
+or click in the <b>list of functions</b> on the left (filter by name or address): functions of the labels file and
+all the call targets found in the code (the list exists even without labels, with names <code>sub_xxxxx</code>);
+the <b>Assembly</b> box shows or hides the instructions column;
+the start of the function comes from the bounds of the labels file; without them, it is guessed (after the return that precedes it) and
+it is indicated. <b>Double-click</b> a
+line: the instruction in the disassembly. When stopped, the PC's line is highlighted.</p>
+<ul>
+  <li><b>H</b> (green): direct translation of one instruction (assignment, operation, bit, direct call, return).</li>
+  <li><b>M</b> (orange): condition reconstructed from the flags of the previous instruction on the same path
+      (comparison, subtraction…), or memory access through a DPP page 0-2 assumed constant (calibration
+      <code>CAL_xxxx</code>…).</li>
+  <li><b>B</b> (red): indirect jump or call (unknown target), flags coming from another path, undecoded bytes.</li>
+</ul>
+<p><b>Structure</b>: the pseudocode is reconstructed from the function's flow graph (<a href="#graphe">Graph</a> tab):
+<code>if</code> / <code>else if</code> / <code>else</code> up to the point where the branches rejoin, loops
+<code>while (condition)</code>, <code>do … while (condition)</code> or <code>while (1)</code> with <code>break</code> and
+<code>continue</code>. The comparison preceding a jump disappears into the condition (<code>cmpb rl4, X</code> then
+<code>jmpr cc_C</code> give <code>if (rl4 &lt; X)</code>), and a series of tests that lead to the same place becomes a
+single condition (<code>if (a || b || c)</code>). A <code>goto</code> remains when the code jumps into a part already written
+(end common to several paths, as the compiler does): of the ID41's 494 functions, 73 % have none.
+The names come from the labels (loaded file, automatic labels of the vectors, SFR); a pointer to a named table
+is written <code>&amp;Name</code> (<code>r12 = &amp;VANOS_OnOff_HeavyThrottle</code>); otherwise <code>M[0xE9B6]</code> for the RAM and
+<code>CAL_01F7</code> for the calibration. The function's comment (labels file) is shown above it. Of
+the ID41 firmware's 314 called functions: about 79 % H lines, 9 % M, 0.2 % B (the comparisons folded into
+the conditions no longer count as lines).</p>
+
+<h3 id="graphe">Graph</h3>
+<figure><img src="images/graphe.png" alt="Graph tab: flow graph of the main loop, PC block highlighted"></figure>
+<p>The <b>Graph</b> tab shows a function like IDA's graph view: one rectangle per basic block (sequence
+of instructions without a jump), connected to its successors. <b>Green</b> arrow: jump taken; <b>red</b>: jump not taken (you
+continue to the next instruction); <b>blue</b>: unconditional passage. The instruction responsible for the jump is highlighted in its block: in <b>green</b> for a conditional
+jump (the green arrow goes where it jumps, the red is the case where it does not jump; in pseudocode, it is the
+<code>if (…)</code> line: green = condition true), in <b>blue</b> for an unconditional jump. The exits are
+arranged in the order of their targets, so that the green and red arrows do not cross. The loop arrows
+(return toward a block higher up) start from the right corner of the block and go back up just to its right, in a free
+corridor: a self-loop stays stuck to its block. An arrow that jumps several layers goes down in a straight line
+(aligned on its destination block when room allows), with a curve only between two layers. The arrows are drawn
+over the blocks, never hidden. The entry block is framed in blue, the PC's one in green, the PC instruction
+highlighted. Block contents: <b>Assembly</b> or <b>Pseudocode</b> (choice in the bar). Same function choice as
+in the Pseudocode tab (including its list of functions on the left), plus <b>Previous</b>. <b>Wheel</b>: zoom around the mouse; <b>drag</b>: move;
+<b>Fit</b>: the whole function on screen; <b>double-click</b> on a call (in blue): graph of the called function;
+double-click on another line: the instruction in the disassembly. The blocks are arranged in layers (longest
+path from the entry) and placed to limit the crossings.</p>
+
+<h3 id="symboles">Symbols</h3>
+<figure><img src="images/symboles.png" alt="Symbols tab"></figure>
+<p>List of the known names (vectors, registers, labels loaded by <i>File &gt; Load labels</i>). <b>Filter</b>
+to search; <b>double-click</b> to show the address in the disassembly.</p>
+<p><b>Labels of each software</b>: when a full read is loaded, the simulator computes the fingerprint of its program
+(region 0x18000-0x3FFFF, the same for all the cars of the same software, whatever the calibration) and loads
+on its own the labels file that corresponds to it in <code>data/labels</code> (list in <code>index.csv</code>); the
+log indicates it. A file chosen by hand with <i>File &gt; Load labels</i> stays in place. The labels of
+the ID41 (made in IDA) have been carried over to the other software (ID12 M3, ID42, ID59, ID60) by comparing the code:
+each function is found by the resemblance of its instructions (masked addresses), then the calls, the RAM variables
+and the calibration tables follow the alignment of the instructions. About 91 to 94 % of the labels are carried over; the
+report (<code>data/labels/rapports</code>) gives for each one the method and the score. The addresses change from one software to
+the next (the engine speed is at <code>0FAE4</code> on the ID41, at <code>0FC3A</code> on the ID12, the ID42 and the ID60); they have been
+checked with the engine running (engine speed, water temperature, battery voltage read in RAM). To remake the files:
+<code>./outils/labels_versions.sh</code>.</p>
+<p><b>Automatic names specific to the CPU</b>, without a labels file: each hardware vector jumps toward a relay table
+then toward its handler; the simulator follows these jumps when the full read is loaded and names <code>CC15INT_relais</code>,
+<code>CC15INT_isr</code>, <code>RESET_entree</code>… A vector that jumps onto itself (source never armed by the program)
+is named <code>…_boucle</code>. The PEC pointers of the internal RAM (<code>SRCP0</code>-<code>DSTP7</code>) and the SFR
+registers are named too. A label loaded from a file stays the priority.</p>
+
+<p><b>Executed code highlighted</b>: in the disassembly, the pseudocode and the graph, instructions executed recently (about 400,000 instructions, whether the CPU is running or paused) are tinted turquoise, brighter the more recent they are. In the <b>Functions</b> list (left of the pseudocode and graph), functions that executed code recently are tinted the same way. Tracking is only active while one of these views is shown <b>and the <i>Settings &gt; Highlight explored code</i> option is ticked</b> (unticked by default, remembered): otherwise nothing is tinted and tracking costs nothing. <b>Current instruction (PC)</b>: always <b>orange</b>, with or without this option: the line in the disassembly and the pseudocode, the line and the block frame in the graph, and the current function (orange and bold) in the <b>Functions</b> list. Without the option, that is all that is highlighted in these views.</p>
+<p><b>Follow execution</b>: the "Follow execution" box in the disassembly, pseudocode and graph views centres the view on the current instruction: when the PC leaves the displayed function the view switches to the function that contains it, then the PC line (or block) is selected and brought to the middle. The PC line updates by itself, without hovering the graph, also while the CPU is running.</p>
+<p><b>Arrays and multi-byte variables</b>: a label file may contain a "sizes" section (size of the named arrays and structures). An address inside an array is shown as "Name+offset" in the disassembly, pseudocode and graph, and the tooltip shows the array's comment. The header may also list other CRC32 fingerprints ("also") so one file serves several reads of the same software. The files in data/labels were rebuilt from the IDA databases (function and variable names, comments); anything taken over from another software version is tagged "[port …]" and comments generated automatically from the references "[auto …]".</p>
+
+<h3 id="labels-edition">Renaming, commenting and saving labels</h3>
+<p>In the <b>disassembly</b>, the <b>pseudocode</b> and the <b>graph</b> (and in the <i>Functions</i> and <i>Symbols</i> lists), a
+<b>right-click</b> on a word or on a line opens the labels menu:</p>
+<ul>
+  <li><b>Rename &lsquo;name&rsquo;&hellip;</b>: new name for a function, a variable or a label (letters, digits, <code>_ . $ ? @</code>,
+      no spaces; a name already in use is refused). An empty name removes the chosen name. The new name appears at once in the disassembly,
+      the pseudocode, the graph and the lists.</li>
+  <li><b>Comment on &lsquo;name&rsquo;&hellip;</b>: free text (several lines) shown <b>on hover</b> over the variable or the function, in the three views;
+      in the disassembly, a comment set on an instruction address appears in the <i>Comment</i> column.</li>
+  <li><b>Show in graph</b> / <b>in pseudocode</b> / <b>in disassembly</b> (for a function or a label, depending on the view you start from):
+      the matching tab comes to the front (or its detached window) and shows the function.</li>
+  <li><b>Show this function in the graph</b> (or <b>in the pseudocode</b>): always offered, even on a line without a symbol, for the function (or line) you clicked in.</li>
+</ul>
+<p>The target is the word under the mouse; if the word is not a known name (a hexadecimal address, for example), the menu offers the
+symbols of the line&rsquo;s instruction: jump or call target, variable read or written, label of the line.</p>
+<p><b>Combined mode</b>: the <i>Sync with graph</i> (pseudocode) / <i>Sync with pseudocode</i> (graph) box, ticked by default, links the two tabs
+: the function picked in one is shown in the other, and the line clicked in one is highlighted in the other. If both tabs are shown at the same time
+(one detached into its own window: right-click on the tab), the other one updates at once; in tabs mode (only one visible at a time), it takes the function and line
+picked in the other as soon as you switch to its tab.</p>
+<p><b>Saving</b>: <i>File &gt; Save labels</i> (or <i>as&hellip;</i>) writes a JSON file with the names, the function bounds and the comments,
+preceded by a <b>version header</b>:
+<code>"program": {"crc": "378F0883", "description": "programme 410G805004006"}</code>. The <code>crc</code> is the fingerprint of the loaded program (see above):
+any file in <code>data/labels</code> carrying this header is <b>loaded automatically</b> for that software. The folder is <b>scanned when the simulator opens</b>
+and when a full read is loaded: the log lists the files and their version; if several files exist for the same software, the most recent one is used. The loaded
+file is backed up as <code>.bak</code> the first time it is overwritten; when quitting (or loading another full read or other labels), the simulator offers
+to save the changes. A labels file made for another software is flagged before it is loaded. Old files (no header, IDA <code>func_cmts</code>
+or plain <code>ADDRESS NAME</code> text) can still be read; <code>outils/labels_versions.sh</code> adds the header to the files it produces.</p>
+
+<h3 id="accesbus">Bus access</h3>
+<figure><img src="images/acces_bus.png" alt="Bus access tab"></figure>
+<p>Log of the data reads (R) and writes (W) made by the program: sequence number, accessing instruction,
+address, region, value, symbol. The registers R0-R15, the stack and the code read are not logged.</p>
+<ul>
+  <li><b>Filters</b>: regions (flash, CAN, external RAM, internal RAM, SFR, unwired regions), <i>Reads</i> / <i>Writes</i>,
+      <b>address</b> range in hex (bounds included, empty = all; value in red if it is not valid).
+      The filters act <b>at capture</b>: the buffer only fills with the retained accesses. Example: only the
+      <i>RAM int</i> region and the range <code>FB26</code>-<code>FB2B</code> to follow the knock retard of the six cylinders.
+      Tightening a filter also hides the lines already captured; widening it does not bring back the accesses that were not kept.</li>
+  <li><b>Buffer</b> of 20,000, 100,000 or 500,000 lines. The firmware makes about 600,000 data accesses per simulated second:
+      without a filter, 20,000 lines cover about 30 ms.
+      <i>Circular</i> keeps the latest accesses; <i>Stop when full</i> keeps the first ones after <b>Clear</b> and indicates it ("BUFFER FULL").</li>
+  <li><b>Counters</b>: lines shown, buffer fill, retained accesses, accesses per second, and on the second line
+      <b>all</b> the accesses seen by region, filtered or not. They continue during execution, even when the buffer is full.</li>
+  <li><b>Hidden tab</b>: with the starting settings (default regions, reads and writes, all the addresses,
+      circular), the log only captures and counts while it is shown; the buffer fills again in
+      a few milliseconds on return. As soon as a capture is set (region, direction or address filter, or
+      <i>Stop when full</i>), it continues even with the tab hidden, so as not to miss a rare access.</li>
+  <li><b>Follow live</b>: the list updates 4 times per second during execution; unchecked, only the counters move
+      and the list is updated at the pause.</li>
+  <li><b>Double-click</b>: in the <i>Instr.</i> column, goes to the code; elsewhere, shows the data.</li>
+</ul>
+
+<h3 id="pointsarret">Breakpoints</h3>
+<figure><img src="images/points_arret.png" alt="Breakpoints tab with two examples"></figure>
+<ul>
+  <li><b>Code</b> (on the left): stop <i>before</i> the instruction at the address. The <i>Active</i> box lets you keep it without it being used.</li>
+  <li><b>Memory</b> (on the right): stop <i>after</i> the instruction that reads or writes an address range, possibly
+      only for a given value. Example: <code>E655</code> written with <code>AA</code> (end of the CRC checks at startup, satellite configuration validated).
+      The <i>Triggers</i> column counts the stops.</li>
+</ul>
+
+<h3 id="interruptions">Interrupts</h3>
+<figure><img src="images/interruptions.png" alt="Interrupts tab"></figure>
+<p>On the left, each interrupt source (CAPCOM CC0-CC15, timers T0-T6, ADC, serial links…) with its vector,
+its enable (IE) and request (IR) bits, its priority levels and the number of times it has been serviced.
+On the right, the 8 PEC channels (automatic transfers without interrupt): counter, size, source, destination.</p>
+
+<h3 id="kline">K-line</h3>
+<figure><img src="images/kline.png" alt="K-line tab with an identification"></figure>
+<p>The traffic on the virtual K-line, frame by frame, with the simulated time and the direction (tool → DME, DME → tool). The
+top bar gives the baud rates (ECU and tool, 9600 baud 8E2) and the counters. At the bottom, you can send
+a DS2 frame by hand: type the bytes in hex <b>without</b> the checksum, it is added automatically. Examples:
+<code>12 04 00</code> identification, <code>12 05 04 00</code> read faults. Run must be started for the ECU to respond.</p>
+
+<h3 id="can">CAN</h3>
+<figure><img src="images/can.png" alt="CAN tab"></figure>
+<p>The engine CAN bus (500 kbit/s) and the ECU's SAE81C91 controller. The table shows the last frame of
+each identifier, decoded: <b>DME1</b> <code>0x316</code> (engine speed, load), <b>DME2</b> <code>0x329</code> (coolant
+and air temperatures, speed, throttle), <b>DME4</b> <code>0x545</code> (EWS refusal, consumption, overheating), every 10 ms.
+Options:</p>
+<ul>
+  <li><b>Other ECUs on the bus</b>: they acknowledge the frames. Unchecked (setting at launch), the ECU is
+      alone, as on a dyno: its frames stay pending and the controller goes error-passive.</li>
+  <li><b>CAN H / CAN L short circuit</b>: bus-off. The firmware puts the controller in reset and reinitializes it when the
+      short circuit disappears (if it monitors the bus: only with a coded or detected automatic transmission).</li>
+  <li><b>Automatic transmission (EGS)</b>: sends EGS1 <code>0x43F</code> (gear code, torque reduction). The ECU
+      only detects the transmission in the half-second following power-up: check, then turn the ignition off and back
+      on. Uncheck afterward: message absent, code 217. Codes 216 and 219 exist in the firmware but their
+      debounce step is 0 in the ID41 calibration: they are never memorized.</li>
+</ul>
+
+<h3 id="ews">EWS (immobilizer)</h3>
+<p><b>EWS</b> tab at the bottom of the main window (detachable like the others), also opened by <i>Tools &gt; EWS (immobilizer)</i>.
+Turning the ignition off and back on does not pause the simulation: ECU off, time keeps passing and
+turning the ignition back on relights it (new EWS exchange).</p>
+<figure><img src="images/ews.png" alt="EWS tab"></figure>
+<ol class="reperes">
+  <li><b>ECU</b>: the ISN stored in the ECU (4 characters at address <code>0x1CEA</code>) and the
+      12-bit code it derives from it and expects from the EWS (<code>0xF0BE</code>); the state of the start authorization; buttons to
+      turn the ignition off and back on (the exchange takes place at each power-up).</li>
+  <li><b>AUTOMATIC EWS</b>, checked by default: the EWS unit takes the ISN expected by the ECU, the start is
+      always authorized.</li>
+  <li><b>ISN stored in the EWS</b>, when the box is unchecked: 4 digits (or the 12-bit code in hex), <i>Write</i>.
+      <i>Copy the ECU's ISN</i>, or <i>EWS from another car</i> for a different ISN: start refused and code 209.</li>
+  <li><b>Faults</b>: EWS unplugged (no longer responds: refusal and code 18), corrupted checksum (code 18).</li>
+  <li><b>Exchange log</b>: each message <code>0x109</code> that the EWS sends to the ECU through the satellite, with
+      the ISN sent, the ISN expected and the result of the same check as the firmware (<code>EWS_CodeCheck</code>).</li>
+</ol>
+<p>The message changes with each send (rolling code: 4096 forms for the same ISN), the ECU always checks the
+same relation. The detail of the coding is recalled below the log.</p>
+
+<h3 id="journal">Log</h3>
+<figure><img src="images/journal.png" alt="Log tab"></figure>
+<p>Messages from the simulator: loadings, choice of the definition and problems found in the XML, traps, stops on a
+breakpoint, connection of MS41 ECU Tool… When a full read is loaded, the Log reports the wrong checksums:
+the ECU will then set code 100 (reason 0x400), like a real MS41.</p>
+
+<h2 id="reglages">Engine, dyno and settings</h2>
+
+<h3 id="fenetremoteur">Engine window: characteristics and settings</h3>
+<p>Opened by the <b>Engine settings…</b> button of the Virtual engine tab, or by <i>Tools &gt; Engine: specs and settings</i>.
+Its position is remembered.</p>
+<figure><img src="images/moteur_fiche.png" alt="Engine window, M52B28 card"><figcaption>M52B28 card.</figcaption></figure>
+<ol class="reperes">
+  <li><b>Engine and injectors simulated</b> right now, with the real flow of the injectors at the set fuel pressure.</li>
+  <li><b>Tabs</b>: one <b>card per engine</b> (M52B20, B25, B28 and S52B32) with the manufacturer characteristics (geometry, crank gear, crankshaft, camshafts, VANOS, valves, torque and
+      power, injectors…), and the <b>Custom</b> tab. <b>S52B32</b> (M3 E36 US 1996-1999): 3152 cm³,
+      86.4 × 89.6 mm, compression 10.5, 179 kW at 6000 rpm and 320 N·m at 3800 rpm, same block and same cylinder head as the M52,
+      injectors BMW 13641703819 (Bosch 0 280 150 440, entry "M3 3.2 US S52" of the list), 135 mm connecting rods like the B28,
+      crankshaft specific to the S52. Its card comes from the same files as those of the M52s (<i>s52b32</i> column of
+      <code>docs/M52 physical specs</code>); each value carries its source: <i>manufacturer_reported</i> (BMW),
+      <i>common_part_spec</i> (common part), <i>measured_non_OEM</i> (measurements and forums), <i>estimated</i> (hypothesis,
+      often "taken equal to the M52") or <i>not_available</i> when nothing reliable was found (crankshaft diameters,
+      masses, VANOS range, exhaust timing, idle speed…). The camshafts are taken as the
+      Schrick 252/244 set given as equivalent to the US S52 (hypothesis): the 252° / 244° count long ramps, the Schrick datasheet
+      gives 219° / 206° at 1 mm of lift; the simulator therefore uses the equivalent durations 235° / 222° (its model reaches
+      1 mm 8° after the opening), i.e. an overlap at idle close to the M52. On a card: <i>Simulate this engine</i> (with its original
+      injectors) or <i>Copy into Custom</i> as a starting point.</li>
+  <li><b>Conditions</b>, valid for all the engines: <b>real atmospheric pressure</b> (in hPa, or via the altitude,
+      the two are linked) and <b>fuel pressure</b> (regulator). The resulting air density (with the air
+      temperature) is shown: the filling and the torque follow the same proportion. The MS41 has no pressure sensor:
+      the air meter measures the real air mass, so the ECU meters correctly at altitude.</li>
+</ol>
+<figure><img src="images/moteur_personnalise.png" alt="Engine window, Custom tab"><figcaption>Custom tab.</figcaption></figure>
+<p>The <b>Custom</b> tab describes a modified engine and injectors changed on the car:</p>
+<ul>
+  <li><b>Engine</b>: displacement, compression ratio (cycle efficiency), filling as a % of the original M52's
+      (camshafts, intake, cylinder head…), friction, crankshaft and flywheel inertia (lightened flywheel:
+      the engine speed rises faster), <b>intake manifold</b> (original M52, identical on B20/B25/B28, or M50B25
+      manifold: 30 cm runners of 55 × 25 mm, like the cylinder head port, instead of 45 × 23 mm; about +7 kW toward
+      6000 rpm and −2 % of torque toward 2500-3000 rpm on a B28), reference torque and power to compare with the dyno.</li>
+  <li><b>Injectors</b>: static flow (cm³/min at 3 bar, manufacturer data) and dead-time curve versus the voltage
+      (Bosch 415 / 440 curves as a starting point, ±10 %). The bottom line indicates the mixture offset expected relative
+      to the injectors intended by the map: for example, injectors of 300 cm³/min on a map
+      intended for the 440 (231 cm³/min) enrich the mixture by 30 %.</li>
+  <li><b>Apply</b> saves these values; the boxes <i>Simulate this engine</i> and <i>Fit these injectors</i>
+      put them into service. The effect is immediate, engine running (to follow in the Curves: lambda, torque).</li>
+</ul>
+<p><b>VANOS (hydraulic retard)</b>, in the conditions: the ECU commands the solenoid all-or-nothing, but the
+mechanism takes a few turns to react then to shift the cam (oil pressure). Four settings, in <b>engine turns</b>:
+wait then sweep at engagement (2 + 4 by default), wait then sweep at release (1 + 3). The real cam
+position is followed in the Curves (<i>VANOS</i> channel); the firmware measures it and takes it into account (fuel and
+timing corrections, code 212 if it does not follow the command). The VANOS actually shifts the intake shaft in the virtual
+engine (cam axis 115° → 90° after TDC on the B28): the filling and the residual gases are computed degree by degree
+from the 24 valves (2 intake of 33 mm and 2 exhaust of 30.5 mm per cylinder), the piston, the manifold runners
+and the timing (no imposed percentage). Cam advanced: better filling at low and medium
+engine speed, worse beyond ~3900 rpm, and more residual gases at idle (VANOS stuck advanced: low and
+irregular idle). The flows against the direction of the overlap (burned gases pushed back into the intake runner or drawn
+from the exhaust) pass less well than the normal flow: their coefficient is recalibrated on a published measurement
+(4-valve engine with variable timing: 35 % of residual gases at 1000 rpm, 0.44 bar and 42° of overlap), and the
+combustion stays stable up to ~27 % of burned gases. The recent software (ID12 M3, ID42, ID60) engage the VANOS
+at a cold idle just after the start: the virtual engine now supports it.</p>
+
+<h3 id="banc">Power dyno</h3>
+<p>Opened by the <b>Power dyno…</b> button of the Virtual engine tab, or by <i>Tools &gt; Power dyno</i>.
+A virtual eddy-current brake holds the requested engine speed: with the engine stabilized, the braking torque equals the
+engine's torque; this is what the dyno measures. The firmware knows nothing of the dyno: it sees an engine at full load.</p>
+<figure><img src="images/banc_puissance.png" alt="Power dyno, full-load pull of the M52B28"><figcaption>Full-load pull of the M52B28 (440 injectors) from 1500 to 6500 rpm at 300 rpm/s, then lift-off: engine losses in orange dots.</figcaption></figure>
+<ol class="reperes">
+  <li><b>Full-load sweep by steps</b>: throttle at 100 %, engine-speed steps (start, end, step). At each step, the brake
+      stabilizes the engine speed then measures for 0.5 s. The engine is started if needed. The <b>simulated speed</b> follows the engine speed
+      (36 km/h for 1000 rpm ≈ 4th gear of an E36): with the vehicle at rest, the firmware would set a speed fault at full
+      load. <i>Warm engine</i> imposes 90 °C during the sweep. Everything is restored as before at the end.</li>
+  <li><b>Pull</b>, as on a real dyno: the engine is held at the start engine speed, throttle flat out, then the brake lets it
+      rise at constant rate (<i>rise of … rpm per second</i>, 300 by default; an engine dyno works between 200 and
+      500) up to the end engine speed. The torque is measured continuously, in slices of 100 rpm: brake torque + engine
+      inertia × acceleration. At the end engine speed, the pedal is released and the brake brings the engine back to the start engine speed (1000 rpm
+      per second); on the way, the dyno measures the <b>losses of the driven engine</b> (friction + pumping, injection cut),
+      plotted in orange dots. You hear the whole pull. During a continuous rise, the ECU does not see exactly
+      the same thing as in steps (enrichment, timing): the two measurements can differ by a few %.</li>
+  <li><b>Holding RPM</b>: manual measurement at a chosen engine speed and throttle opening (the throttle is adjusted during
+      the measurement); torque, power in kW and in hp shown live. <i>Release the brake</i> makes the engine free again.</li>
+  <li><b>Options</b>: the <b>estimate from the tables</b> (see below) and its effective efficiency; <i>Keep as
+      reference</i> freezes the curve in gray to compare after a modification (map, injectors, VANOS,
+      altitude…); <i>Export CSV</i> saves the measured points and the estimate.</li>
+  <li><b>Curves</b>: torque (blue, left scale) and power (red, on the right) measured, estimate in green
+      dots, losses at lift-off in orange dots (pull), manufacturer values in diamonds. Below the graph, the table of the points: lambda, timing, air and injection
+      duration recorded during the measurement.</li>
+  <li><b>Summary</b>: max torque and max power measured, compared with the manufacturer; after a pull, the losses at the
+      max-power engine speed. <i>Export CSV</i> adds the losses curve to it.</li>
+</ol>
+<p><b>Estimate from the tables.</b> Like the calculation known for the TDI diesels (torque ∝ injected quantity), one
+derives the torque of a gasoline engine from the map alone: at full load, the air per cylinder comes from the
+alpha-N table (max-throttle column), the fuel burned is limited by the air (λ = 1, the excess enrichment gives
+nothing), then torque = 6 cylinders × fuel burned × 43 MJ/kg × effective efficiency / 4π. The effective efficiency
+(0.31 by default, ordinary for an atmospheric gasoline engine of this era) is adjustable. The timing and the injection
+duration of the tables are given for information. It is an estimate: the air comes from the alpha-N table, which is the
+fallback value of the limp-home mode (air meter failed), deliberately coarse: it underestimates the real filling
+by about 7 % between 2000 and 4500 rpm. At 4000 rpm the estimate gives about 80 % of the torque measured on the virtual dyno.</p>
+<p>On the virtual dyno, the M52B28 gives about 290 N·m and 142 kW max at 20 °C (manufacturer 280 N·m and 142 kW). The virtual engine breathes according to its own
+physical model (throttle, idle valve, manifold, charge renewal computed with the real camshaft timing): modifying the map changes what the ECU
+commands, not the way the engine breathes.</p>
+
+<h3 id="contact">Ignition (+15), post-run and EEPROM</h3>
+<p>As on the car, turning off the ignition does not cut the ECU right away: the firmware sees the voltage drop
+(state "ignition cut, shutting down"), stops injection and ignition, holds the main relay during the
+<b>post-run</b> (6 s after an engine stop), writes into its <b>EEPROM</b> what it must keep (adaptations,
+fault memory, VANOS rest position…), then releases the relay: the ECU turns off. The
+<i>State</i> line of the Virtual engine tab shows it ("ignition cut, post-run", then "ECU off").
+Turning the ignition back on relights the ECU: the RAM is lost, the firmware re-reads the EEPROM and redoes the EWS exchange.
+A fault memorized before the cut is therefore still there at restart.</p>
+<p><b>Blank EEPROM by default</b>: at each loading of a full read, the 24C04 is blank (all <code>FF</code>), like a
+new chip. Menu <i>File &gt; Simulated EEPROM (24C04)</i>: <b>startup file</b> (a 512-byte EEPROM, read for
+example on a real ECU, loaded at each full read without being modified); <b>keep the EEPROM of each full read</b>
+(one file per full read in the simulator's <i>eeprom</i> folder, re-read at loading and saved as soon as the firmware writes it);
+save under another name, load an EEPROM now, or erase it. A load or an erase takes effect at the
+turning of the ignition back on.</p>
+
+<h3 id="son">Engine sound (Settings menu)</h3>
+<p>The virtual engine can be heard: the sound is synthesized live from what the engine does, not from a
+recording. At each engine stroke (three per turn, order 1-5-3-6-2-4), the cylinder's puff of gas, the louder
+the stronger the combustion was, passes through a model of the exhaust line: <b>6-2 manifold</b> (six primaries of 32 mm and 0.60 m joined in
+two tubes of 63 mm and 3.5 m, one per bank 1-2-3 / 4-5-6), then the <b>muffler</b>, whose chambers and baffles spread
+each puff and whose wool absorbs the highs: the sound is rounder. A cylinder that does not burn only gives a
+breath: you hear the misfires, the starter, the engine speed rising or stalling. Each puff has the shape of a real
+exhaust event (pressure peak at the valve opening then expulsion by the piston): the idle stays well present, even
+on a computer speaker. The intake adds a rumble when the throttle is open.</p>
+<p><b>Starter</b>: low rumble of the electric motor (about 11 armature turns per crankshaft turn, ≈ 75 Hz),
+which slows at each compression (three per turn). Once the engine is started, the pinion's freewheel disengages: the starter
+turns alone at its free speed as long as you hold it. <b>Misfire</b>: the cylinder that does not burn only gives a dull breath, you hear the hole in
+the rhythm.</p>
+<p><b>Pops on lift-off</b>: on deceleration, the ECU cuts the injection; the fuel left on the walls
+keeps arriving in the cylinders without burning, with air. If the manifold is hot enough (at least 620 °C between the
+gases and the wall), this mixture ignites at times. The exhaust temperature is simulated per bank: gas at the manifold (≈ 450 °C at
+idle, ≈ 850 °C at full load, more with retarded ignition) and manifold wall, which heats up in about ten
+seconds of load and cools slowly. Cold exhaust or mere throttle blips: little or no pops; after
+a load buildup: a few pops on lift-off. No pops under acceleration: all the cylinders burn, and the oxygen of a slightly lean mixture oxidizes the unburned gases
+without noise; you need a charge that does not burn (injection cutoff on lift-off or at the limiter, misfire). The throttle follows the
+pedal as through the cable (≈ 0.1 s for the full travel), even if you move the slider in one go.
+The two temperatures are in the Curves.</p>
+<figure><img src="images/menu_settings.png" alt="Settings menu"></figure>
+<p><b>Settings</b> menu: <b>Mute</b> cuts the sound (the choice is kept from one launch to the next); <i>Engine volume</i>; <a href="#theme">Theme</a>;
+<b>Exhaust</b>. The sound follows the engine speed in real time; at simulation speed "Max", it stays played at the current engine speed.</p>
+<p><b>Settings &gt; Exhaust</b>: three sounds, tuned from recordings of a 328i E36 (kept from one launch to the next):</p>
+<ul>
+  <li><b>Original</b> (BMW muffler): low and muted at idle, marked burble, brightens under load (the muffler
+      lets through more highs as the gas flow increases);</li>
+  <li><b>X-pipe + race muffler</b> (Supersprint type): same line as the race muffler, but the X evens out the puffs
+      of the two banks (more regular sound) and lets through more highs;</li>
+  <li><b>Race muffler</b> (Eisenmann type): round at idle, deep body around 60 Hz, differences between cylinders
+      marked, opens up quickly as the engine speed rises.</li>
+</ul>
+<p>The sound comes almost entirely from the puffs of the cylinders. To it is added a <b>light breath</b> (noise of the gases that
+follows each puff), deliberately well below the engine sound. The grain comes from what varies from one puff to
+the next: the force of each combustion changes a little from one cycle to the next and each cylinder is slightly different.
+The tubes send back part of the wave from the muffler (tube resonances), the muffler filters the highs and
+the body adds a low resonance specific to each exhaust. On a throttle blip, the virtual engine can miss
+one or two cycles (the fuel has not yet caught up with the air): you hear a weaker puff, not a hole.</p>
+<figure><img src="images/son_echappement.png" alt="Spectra of the recordings and of the simulator, at idle and during an engine-speed rise"></figure>
+<p>In the figure: the distribution of the energy by third of an octave (from 63 Hz to 1.6 kHz) of the recordings (white) and
+of the simulator (blue), at idle and during an engine-speed rise (2000 to 4500 rpm). The remaining differences come partly from the
+recordings: videos taken with different microphones and at different distances, ambient noise, and a different idle
+(the X-pipe recording runs around 1000 rpm, the virtual engine around 700). The final settings were chosen
+by ear. The sound level of each exhaust is not measurable on these videos.</p>
+
+<h3 id="manette">Gamepad (Settings menu)</h3>
+<figure><img src="images/manette.png" alt="Settings > Gamepad"></figure>
+<p><b>Settings &gt; Gamepad…</b> menu: the virtual engine's sliders (throttle, fixed engine speed, temperatures, speed,
+load, battery, A/C pressure) are driven with the <b>axes</b> of a gamepad, and the commands (Start, starter,
+turn off the ignition, ignition, connect the engine, mode, option boxes and simulated faults) with its <b>buttons</b>. Any
+gamepad recognized by the system will do: Xbox, PlayStation or Switch gamepad, generic gamepad, wheel, pedals.</p>
+<ol>
+  <li>Connect the gamepad: it appears at the bottom of the window with its axes (bars) and its buttons (pills), live.</li>
+  <li>Choose a command in the list, click <b>Assign…</b>, then move the axis fully or press the button (8 s).
+  The axis travel is learned at the first movement: trigger (rest at the bottom), stick (rest at the center), pedal.</li>
+  <li>Options of the chosen command: <b>Invert</b>; <b>Any gamepad</b> (otherwise, only the gamepad used at
+  the assignment); for a slider, <b>Absolute</b> mode (the axis position gives the value, e.g. trigger = throttle) or
+  <b>Relative</b> (the stick makes the value go up or down, and it stays when you let go: handy for the temperatures
+  or the speed), <b>Stick centered: full travel</b> (the whole travel of the stick instead of a half), relative rate and
+  dead zone. The <i>Value</i> gauge shows what the axis produces.</li>
+</ol>
+<p><b>Basic configuration</b> (recognized gamepad): right trigger = throttle, left trigger = external load, left stick
+up/down = vehicle speed, right stick up/down = fixed engine speed (relative), Start = Start, A = starter (as long
+as it is held), B = turn off the ignition, Select = ignition, Y = A/C. The assignments are kept from one launch to the next;
+the <b>Drive the virtual engine with a gamepad</b> box suspends the driving without losing them. The mouse stays usable: a
+slider assigned in absolute mode only moves when the axis moves.</p>
+<p>The status line indicates the driver and the number of reads per second (about 100). If a gamepad is seen but its
+inputs no longer move: <b>Restart the driver</b>. On Windows, the <b>Compatibility mode</b> box reads the gamepads via
+XInput (Xbox gamepads) and DirectInput only, without the raw inputs: to try if the gamepad does not respond.</p>
+
+<h3 id="mcp">MCP server for Claude (Settings menu, experimental)</h3>
+<p><b>Experimental feature.</b></p>
+<p><b>Settings &gt; MCP server (Claude)…</b>: an assistant like Claude (Claude Code, Claude Desktop) connects to the
+simulator through the MCP protocol, reads all its state and can drive it as with the mouse. Disabled by default; once
+checked, the choice is kept from one launch to the next. The server only listens on this computer (<code>127.0.0.1</code>,
+port 41041 by default) and refuses web pages from other sites. <b>Allow driving</b> (checked by default): unchecked,
+the assistant can only read. Each driving action is noted in the <i>Log</i>.</p>
+<ul>
+  <li><b>Reading</b>: <code>sim_status</code> (loaded file: name, format, part number, software index, program
+      fingerprint, flash modified; definition and labels; execution), <code>engine_state</code> and <code>engine_panel</code>
+      (virtual engine, all the panel values including the active faults), <code>cpu_state</code> (PC and current
+      function, registers), <code>bus_activity</code> (addresses read and written for a moment, with the accessing
+      instruction), <code>read_memory</code>, <code>list_tables</code> / <code>read_table</code> (values, read cells, exact
+      firmware position), <code>list_curve_channels</code> / <code>read_curves</code>, <code>disassemble</code>,
+      <code>list_controls</code>, <code>dyno_status</code>, <code>read_gal</code>, <code>read_sensors</code>,
+      <code>list_breakpoints</code>.</li>
+  <li><b>Driving</b>: <code>set_control</code> (all the sliders, boxes and buttons of the Virtual engine panel: throttle,
+      temperatures, battery…, <b>simulated faults</b>, induced knock, Start, starter held… ; the interface
+      follows), <code>engine_setting</code> (engine mode, octane, simulated engine, automatic start),
+      <code>sim_control</code> (run, pause, reset, step by step, to an address, speed, interface mode, tab
+      shown), <code>write_memory</code> (RAM and SFR like a CPU write; flash: chip contents),
+      <code>write_table</code> (calibration cell, converted or raw value), <code>program_gal</code> (equations of the
+      PLCC, or the original ones), <code>set_sensor</code> (sensor curves, throttle law, trigger wheel, speed
+      pulses), <code>dyno</code> (dyno: holding RPM, sweep, pull, stop), <code>breakpoint</code>,
+      <code>export_curves</code> (the whole curves history in CSV in the <code>logs</code> folder),
+      <code>save_firmware</code> (modified binary saved next to the original, original name + <code>_modifie</code>,
+      never an overwrite).</li>
+  <li><b>Claude skill</b>: <code>docs/claude/ms41-simulator/SKILL.md</code> explains to Claude how to use
+      the simulator (tools, startup, faults, dyno, precautions); to be added to Claude's skills.</li>
+  <li><b>Claude Code</b>: <code>claude mcp add --transport http ms41-simulator http://127.0.0.1:41041/mcp</code>
+      (add <code>--scope user</code> for all the projects), then <code>claude mcp list</code>.</li>
+  <li><b>Claude Desktop</b>: in <code>claude_desktop_config.json</code>, launch the bridge provided in the jar
+      (<code>java -cp MS41Simulator.jar fr.diolum.ms41sim.mcp.StdioBridge 41041</code>); the window gives the exact
+      text to copy with the path of the jar (<i>Copy the settings</i> button).</li>
+  <li>In the <i>simple</i> or <i>extra simple</i> interface mode, the speed stays in real time, as with the mouse. The
+      changes of sensors and simulated engine made by the assistant are not copied into the <i>Sensors</i> and
+      <i>Engine</i> windows already open (to reopen).</li>
+</ul>
+
+<h2 id="fenetres">Separate windows</h2>
+<div class="deux">
+<figure><img src="images/menu_fenetres.png" alt="Windows menu"><figcaption>The Windows menu.</figcaption></figure>
+<div>
+<p>Each bottom tab can open in its own window:</p>
+<ul>
+  <li><b>double-click</b> the tab, or <b>right-click</b> &gt; "Open in a separate window";</li>
+  <li>or the <b>Windows</b> menu, one box per tab.</li>
+</ul>
+<p>The tab stays in place, marked <b>↗</b>, with the buttons "Show the window" and "Dock here". To
+reattach: close the window, or "Return to the main window" at the bottom of it, or
+"Return all to the main window" in the menu.</p>
+<p>The open windows and their position are <b>recovered at the next launch</b>, as well as the position of the
+main window. If a screen has been unplugged, the windows that were on it come back to a default
+position. "Forget window positions" resets everything.</p>
+</div>
+</div>
+<figure><img src="images/fenetre_separee.png" alt="Curves in a separate window, next to the main window">
+<figcaption>The Curves in their own window, next to the main window (on screen, each window of course has its own title bar).</figcaption></figure>
+
+<h2 id="ecutool">Integrated MS41 ECU Tool (v1.1.5)</h2>
+<div class="deux">
+<figure><img src="images/ecu_tool.png" alt="MS41 ECU Tool, identification of the simulated ECU"></figure>
+<div>
+<p><i>Tools &gt; MS41 ECU Tool</i> (or the button of the K-line tab) opens the tool in its window, <b>already connected to
+the simulator's K-line</b>: the port "MS41 Simulator (USB)" is chosen automatically, at 9600 baud.
+The simulation switches to real time; Run must be started.</p>
+<p><b>Fast mode</b> (buttons <i>Partial read fast</i>, <i>Full read fast</i>, <i>Read memory fast</i>, <i>Play fast</i>):
+it works as on the car. The tool unlocks the ECU with the <code>0x90</code> command and its password, the
+firmware itself changes the rate of its UART, and the tool follows: 19,737, then 28,800, then 187,500 baud.
+A partial read (24 KB) takes about 3 s instead of 46 s. If the rates no longer match, the bytes
+arrive with a framing error, as on a real cable.
+As on the car, the unlocking is only possible with the <b>engine stopped</b> and leaves the ECU in
+<b>service mode</b> until the ignition is turned off: ignition and injection cut, the engine no longer starts. Turn the ignition off then
+back on (Virtual engine tab) to restart.</p>
+<p>Everything works as on a car: identification (opposite: part number, immobilizer ISN… ; the chassis number is masked on the screenshot),
+live data, faults, adaptations, activations, flash read and write. After a write,
+<i>File &gt; Save the modified binary…</i> recovers the result in a file.</p>
+<p>As on the car, above <b>2000 rpm</b> the ECU ignores a K-line dialogue request: you must
+open the communication at idle (it then stays open, up to 30 s without an exchange).</p>
+</div>
+</div>
+
+<h2 id="menus">Menus and shortcuts</h2>
+<table>
+  <tr><th>Menu</th><th>Contents</th></tr>
+  <tr><td>File</td><td>Load a full read (format detected, or forced: raw chip read / CPU view); load or remove
+      labels; load a RomRaider definition, choose the definition's ROM; save the modified binary (in the format of the loaded file, or chosen, without ever overwriting the original);
+      simulated EEPROM (keep, save, load, erase); quit.</td></tr>
+  <tr><td>Simulation</td><td>Reset, Step, Step over, Step out, run to line, Run, Pause; breakpoint on line;
+      stop on a hardware trap; watchdog active (reset if not served).</td></tr>
+  <tr><td>Tools</td><td>Engine: specs and settings; Power dyno; EWS (immobilizer); MS41 ECU Tool connected to the simulator's K-line.</td></tr>
+  <tr><td>Windows</td><td>One tab per box in its own window; return all to the main window; forget the positions.</td></tr>
+  <tr><td>Settings</td><td>Mute (engine sound cut); engine volume; exhaust (original, X-pipe + race, race); theme (dark or light); <b>Highlight explored code</b> (tints recently executed code, unticked by default); Gamepad… (driving the virtual engine with a gamepad).</td></tr>
+  <tr><td>Interface Mode</td><td>Extra simple, simple, normal or advanced: tabs and views shown (see <a href="#modes">Interface modes</a>).</td></tr>
+  <tr><td>Help</td><td>This guide (<kbd>F1</kbd>); About.</td></tr>
+</table>
+
+<h2 id="limites">Current limitations</h2>
+<ul>
+  <li><b>Satellite</b>: emulated as a black box from what the firmware expects (its program was not read). The diagnostics
+      of the 24 output stages are sent without fault.</li>
+  <li><b>Ignition input</b>: the firmware only detects the cut at the drop of the voltage measured on AN5; the simulator
+      drops this voltage with the ignition (the exact wiring remains to be confirmed on the board).</li>
+  <li><b>Sound</b>: synthesis tuned on recordings of a 328i E36, to be judged by ear.</li>
+  <li><b>S52B32</b>: on the virtual dyno, about 93 % of the torque and 84 % of the manufacturer power. The S52's intake
+      manifold is not modeled (the M52's is used), its camshafts and its connecting rod are hypotheses,
+      and the loaded map stays that of the ECU read (a US M3 has an MS41.2 with its own calibration).</li>
+  <li><b>Max torque and power</b>: 93 to 99 % of the manufacturer values for B20, B25 and B28 (the filling is recalibrated on the B28's values; the B20 and B25 take the same curve shape, and their 415 injectors with the B28's map give a lean mixture).</li>
+  <li><b>Throttle</b>: wide open, the firmware reads about 85 % with the simulator's original potentiometer
+      (0.66-4.35 V); the sensor's real scale or travel remains to be checked on the car.</li>
+  <li><b>Model sensors</b>: the inductive crankshaft sensor (amplitude, threshold), the engine's knock limit and the
+      satellite's internal processing are not measured on a car.</li>
+  <li><b>Independence from the software</b>: the simulated hardware (engine, sensors, satellite, EWS) reads nothing in the RAM nor in the
+      ECU's calibration. Only certain displays (values read by the firmware, plain-language diagnosis, estimate from the
+      tables) assume the ID41 addresses.</li>
+</ul>
+</main>
+</div>
+<div id="zoom" onclick="this.style.display='none'"><img alt=""></div>
+<script>
+  document.querySelectorAll('figure img').forEach(function (img) {
+    img.addEventListener('click', function () {
+      var z = document.getElementById('zoom');
+      z.querySelector('img').src = img.src;
+      z.style.display = 'flex';
+    });
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.getElementById('zoom').style.display = 'none'; });
+</script>
+</body>
+</html>
