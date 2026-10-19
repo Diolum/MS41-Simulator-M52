@@ -1,4 +1,4 @@
-# MS41 Simulator 1.0.1
+# MS41 Simulator 1.0.2
 
 Simulateur du calculateur moteur **BMW MS41** (moteurs M52 et S52, processeur Siemens SAB 80C166W à 12 MHz).
 Il exécute le **vrai firmware** lu dans un calculateur, instruction par instruction, avec les puces de la carte
