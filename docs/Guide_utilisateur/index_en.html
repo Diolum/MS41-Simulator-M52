@@ -69,7 +69,7 @@
 <div class="cadre">
 <nav>
   <div class="titre">MS41 Simulator</div>
-  <div class="version">User guide – version 1.0.2</div>
+  <div class="version">User guide – version 1.0.3</div>
   <a href="#presentation">Overview</a>
   <a href="#rapide">Quick start</a>
   <a href="#emploi">How to use each tab</a>
@@ -106,6 +106,7 @@
   <a class="sous" href="#graphe">Graph</a>
   <a class="sous" href="#symboles">Symbols</a>
   <a class="sous" href="#labels-edition">Renaming and comments</a>
+  <a class="sous" href="#labels-format">Labels file format and creating labels</a>
   <a class="sous" href="#accesbus">Bus access</a>
   <a class="sous" href="#pointsarret">Breakpoints</a>
   <a class="sous" href="#interruptions">Interrupts</a>
@@ -823,15 +824,9 @@ path from the entry) and placed to limit the crossings.</p>
 to search; <b>double-click</b> to show the address in the disassembly.</p>
 <p><b>Labels of each software</b>: when a full read is loaded, the simulator computes the fingerprint of its program
 (region 0x18000-0x3FFFF, the same for all the cars of the same software, whatever the calibration) and loads
-on its own the labels file that corresponds to it in <code>data/labels</code> (list in <code>index.csv</code>); the
-log indicates it. A file chosen by hand with <i>File &gt; Load labels</i> stays in place. The labels of
-the ID41 (made in IDA) have been carried over to the other software (ID12 M3, ID42, ID59, ID60) by comparing the code:
-each function is found by the resemblance of its instructions (masked addresses), then the calls, the RAM variables
-and the calibration tables follow the alignment of the instructions. About 91 to 94 % of the labels are carried over; the
-report (<code>data/labels/rapports</code>) gives for each one the method and the score. The addresses change from one software to
-the next (the engine speed is at <code>0FAE4</code> on the ID41, at <code>0FC3A</code> on the ID12, the ID42 and the ID60); they have been
-checked with the engine running (engine speed, water temperature, battery voltage read in RAM). To remake the files:
-<code>./outils/labels_versions.sh</code>.</p>
+on its own the labels file that corresponds to it in <code>data/labels</code> (folder to create next to the jar; you supply the labels
+yourself, none are shipped); the log indicates it. A file chosen by hand with <i>File &gt; Load labels</i> stays in place. The addresses change from one software to
+the next: each software needs its own file.</p>
 <p><b>Automatic names specific to the CPU</b>, without a labels file: each hardware vector jumps toward a relay table
 then toward its handler; the simulator follows these jumps when the full read is loaded and names <code>CC15INT_relais</code>,
 <code>CC15INT_isr</code>, <code>RESET_entree</code>… A vector that jumps onto itself (source never armed by the program)
@@ -840,7 +835,7 @@ registers are named too. A label loaded from a file stays the priority.</p>
 
 <p><b>Executed code highlighted</b>: in the disassembly, the pseudocode and the graph, instructions executed recently (about 400,000 instructions, whether the CPU is running or paused) are tinted turquoise, brighter the more recent they are. In the <b>Functions</b> list (left of the pseudocode and graph), functions that executed code recently are tinted the same way. Tracking is only active while one of these views is shown <b>and the <i>Settings &gt; Highlight explored code</i> option is ticked</b> (unticked by default, remembered): otherwise nothing is tinted and tracking costs nothing. <b>Current instruction (PC)</b>: always <b>orange</b>, with or without this option: the line in the disassembly and the pseudocode, the line and the block frame in the graph, and the current function (orange and bold) in the <b>Functions</b> list. Without the option, that is all that is highlighted in these views.</p>
 <p><b>Follow execution</b>: the "Follow execution" box in the disassembly, pseudocode and graph views centres the view on the current instruction: when the PC leaves the displayed function the view switches to the function that contains it, then the PC line (or block) is selected and brought to the middle. The PC line updates by itself, without hovering the graph, also while the CPU is running.</p>
-<p><b>Arrays and multi-byte variables</b>: a label file may contain a "sizes" section (size of the named arrays and structures). An address inside an array is shown as "Name+offset" in the disassembly, pseudocode and graph, and the tooltip shows the array's comment. The header may also list other CRC32 fingerprints ("also") so one file serves several reads of the same software. The files in data/labels were rebuilt from the IDA databases (function and variable names, comments); anything taken over from another software version is tagged "[port …]" and comments generated automatically from the references "[auto …]".</p>
+<p><b>Arrays and multi-byte variables</b>: a label file may contain a "sizes" section (size of the named arrays and structures). An address inside an array is shown as "Name+offset" in the disassembly, pseudocode and graph, and the tooltip shows the array's comment. The header may also list other CRC32 fingerprints ("also") so one file serves several reads of the same software.</p>
 
 <h3 id="labels-edition">Renaming, commenting and saving labels</h3>
 <p>In the <b>disassembly</b>, the <b>pseudocode</b> and the <b>graph</b> (and in the <i>Functions</i> and <i>Symbols</i> lists), a
@@ -863,12 +858,43 @@ symbols of the line&rsquo;s instruction: jump or call target, variable read or w
 picked in the other as soon as you switch to its tab.</p>
 <p><b>Saving</b>: <i>File &gt; Save labels</i> (or <i>as&hellip;</i>) writes a JSON file with the names, the function bounds and the comments,
 preceded by a <b>version header</b>:
-<code>"program": {"crc": "378F0883", "description": "programme 410G805004006"}</code>. The <code>crc</code> is the fingerprint of the loaded program (see above):
+<code>"program": {"crc": "12345678", "description": "my software"}</code>. The <code>crc</code> is the fingerprint of the loaded program (see above):
 any file in <code>data/labels</code> carrying this header is <b>loaded automatically</b> for that software. The folder is <b>scanned when the simulator opens</b>
 and when a full read is loaded: the log lists the files and their version; if several files exist for the same software, the most recent one is used. The loaded
 file is backed up as <code>.bak</code> the first time it is overwritten; when quitting (or loading another full read or other labels), the simulator offers
-to save the changes. A labels file made for another software is flagged before it is loaded. Old files (no header, IDA <code>func_cmts</code>
-or plain <code>ADDRESS NAME</code> text) can still be read; <code>outils/labels_versions.sh</code> adds the header to the files it produces.</p>
+to save the changes. A labels file made for another software is flagged before it is loaded. Old files (no header, with <code>func_cmts</code>
+or plain <code>ADDRESS NAME</code> text) can still be read.</p>
+
+<h3 id="labels-format">Labels file format and creating a label</h3>
+<p><b>Creating a label</b>: there is no file to write by hand. In the <b>graph</b> as in the <b>pseudocode</b> (and in the disassembly), a
+<b>right-click</b> on an address, a <code>sub_xxxxx</code> function, a <code>loc_xxxxx</code> label or a variable that has no name yet
+(shown in hexadecimal) offers <i>Rename&hellip;</i>: the name you type <b>creates</b> the label at that address. <i>Comment&hellip;</i> creates the address comment
+the same way. When the word you clicked is not a symbol, the menu lists those of the line&rsquo;s instruction (jump or call target, variable read or
+written): pick the one to name. Then <i>File &gt; Save labels</i> writes the file described below.</p>
+<p><b>Format</b>: a UTF-8 JSON file, one per software version, in <code>data/labels</code> (any name, <code>.json</code> extension;
+one file per software). All addresses are <b>decimal numbers</b>: the CPU&rsquo;s linear address
+(<code>0x3F9C</code> is written <code>16284</code>). Reduced example:</p>
+<pre>{
+  "format": "ms41sim-labels",
+  "version": 2,
+  "program": {"crc": "12345678", "description": "my software", "also": []},
+  "names":    [[560, "Reset_Handler"], [16284, "EngineSpeed_Rpm"]],
+  "funcs":    [[560, 814], [814, 1042]],
+  "comments": [[560, "Initialisation after reset."], [16284, "Engine speed, rpm."]],
+  "sizes":    [[7477, 715]]
+}</pre>
+<table>
+  <tr><th>Key</th><th>Content</th></tr>
+  <tr><td><code>format</code>, <code>version</code></td><td>Format marker (<code>ms41sim-labels</code>, version 2).</td></tr>
+  <tr><td><code>program</code></td><td><code>crc</code>: CRC32 fingerprint of the program (0x18000-0x3FFFF), 8 hex digits; it selects the right file for the loaded full read.
+      <code>description</code>: free text (software reference). <code>also</code> (optional): other fingerprints of the same program.</td></tr>
+  <tr><td><code>names</code></td><td>List of <code>[address, "name"]</code> pairs: functions, variables, labels. Name: letters, digits, <code>_ . $ ? @</code>, no spaces; one address = one name.</td></tr>
+  <tr><td><code>funcs</code></td><td>List of <code>[start, end]</code>, <b>end excluded</b>: function bounds (for the graph, the pseudocode and the function list). Without this section the start is guessed.</td></tr>
+  <tr><td><code>comments</code></td><td>List of <code>[address, "text"]</code> pairs: shown on hover and in the <i>Comment</i> column; <code>\n</code> for a line break.</td></tr>
+  <tr><td><code>sizes</code></td><td>List of <code>[address, size in bytes]</code> for arrays and structures: an address inside shows as <i>Name+offset</i>.</td></tr>
+</table>
+<p>Only <code>names</code> is required; the other sections and the <code>program</code> header are optional (without a header the file is not loaded automatically: <i>File &gt; Load labels</i>).
+Older formats (JSON with <code>func_cmts</code>, or <code>ADDRESS NAME</code> text) can still be read.</p>
 
 <h3 id="accesbus">Bus access</h3>
 <figure><img src="images/acces_bus.png" alt="Bus access tab"></figure>
@@ -1236,7 +1262,7 @@ open the communication at idle (it then stays open, up to 30 s without an exchan
   <tr><td>Windows</td><td>One tab per box in its own window; return all to the main window; forget the positions.</td></tr>
   <tr><td>Settings</td><td>Mute (engine sound cut); engine volume; exhaust (original, X-pipe + race, race); theme (dark or light); <b>Highlight explored code</b> (tints recently executed code, unticked by default); Gamepad… (driving the virtual engine with a gamepad).</td></tr>
   <tr><td>Interface Mode</td><td>Extra simple, simple, normal or advanced: tabs and views shown (see <a href="#modes">Interface modes</a>).</td></tr>
-  <tr><td>Help</td><td>This guide (<kbd>F1</kbd>); About.</td></tr>
+  <tr><td>Help</td><td>This guide (<kbd>F1</kbd>); Changelog (version history, scrollable); About.</td></tr>
 </table>
 
 <h2 id="limites">Current limitations</h2>

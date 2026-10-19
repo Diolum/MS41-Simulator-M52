@@ -69,7 +69,7 @@
 <div class="cadre">
 <nav>
   <div class="titre">MS41 Simulator</div>
-  <div class="version">Guide utilisateur – version 1.0.2</div>
+  <div class="version">Guide utilisateur – version 1.0.3</div>
   <a href="#presentation">Présentation</a>
   <a href="#rapide">Démarrage rapide</a>
   <a href="#emploi">Mode d'emploi par onglet</a>
@@ -106,6 +106,7 @@
   <a class="sous" href="#graphe">Graphe</a>
   <a class="sous" href="#symboles">Symboles</a>
   <a class="sous" href="#labels-edition">Renommer et commenter</a>
+  <a class="sous" href="#labels-format">Format et création des labels</a>
   <a class="sous" href="#accesbus">Accès bus</a>
   <a class="sous" href="#pointsarret">Points d'arrêt</a>
   <a class="sous" href="#interruptions">Interruptions</a>
@@ -823,15 +824,9 @@ chemin depuis l'entrée) et placés pour limiter les croisements.</p>
 pour chercher ; <b>double-clic</b> pour afficher l'adresse dans le désassemblage.</p>
 <p><b>Labels de chaque logiciel</b> : au chargement d'un full read, le simulateur calcule l'empreinte de son programme
 (zone 0x18000-0x3FFFF, la même pour toutes les voitures d'un même logiciel, quelle que soit la calibration) et charge
-tout seul le fichier de labels qui lui correspond dans <code>data/labels</code> (liste dans <code>index.csv</code>) ; le
-journal l'indique. Un fichier choisi à la main par <i>Fichier &gt; Charger des labels</i> reste en place. Les labels de
-l'ID41 (faits dans IDA) ont été reportés sur les autres logiciels (ID12 M3, ID42, ID59, ID60) par comparaison du code :
-chaque fonction est retrouvée par la ressemblance de ses instructions (adresses masquées), puis les appels, les variables
-RAM et les tables de calibration suivent l'alignement des instructions. Environ 91 à 94 % des labels sont reportés ; le
-rapport (<code>data/labels/rapports</code>) donne pour chacun la méthode et le score. Les adresses changent d'un logiciel à
-l'autre (le régime est en <code>0FAE4</code> sur l'ID41, en <code>0FC3A</code> sur l'ID12, l'ID42 et l'ID60) ; elles ont été
-vérifiées moteur tournant (régime, température d'eau, tension batterie lus en RAM). Pour refaire les fichiers :
-<code>./outils/labels_versions.sh</code>.</p>
+tout seul le fichier de labels qui lui correspond dans <code>data/labels</code> (dossier à créer à côté du jar ; les labels sont à fournir
+soi-même, aucun n'est livré) ; le journal l'indique. Un fichier choisi à la main par <i>Fichier &gt; Charger des labels</i> reste en place. Les adresses changent d'un logiciel à
+l'autre : chaque logiciel a besoin de son propre fichier.</p>
 <p><b>Noms automatiques propres au CPU</b>, sans fichier de labels : chaque vecteur matériel saute vers une table de relais
 puis vers son gestionnaire ; le simulateur suit ces sauts au chargement du full read et nomme <code>CC15INT_relais</code>,
 <code>CC15INT_isr</code>, <code>RESET_entree</code>… Un vecteur qui saute sur lui-même (source jamais armée par le programme)
@@ -840,7 +835,7 @@ SFR sont nommés aussi. Un label chargé depuis un fichier reste prioritaire.</p
 
 <p><b>Code exécuté surligné</b> : dans le désassemblage, le pseudocode et le graphe, les instructions exécutées récemment (environ 400 000 instructions, que le CPU tourne ou soit en pause) sont teintées en turquoise, d'autant plus vives qu'elles sont récentes. Dans la liste des <b>Fonctions</b> (à gauche du pseudocode et du graphe), les fonctions qui ont exécuté du code récemment sont teintées de même. Le suivi n'est actif que pendant qu'une de ces vues est affichée <b>et que l'option <i>Settings &gt; Surligné exploré</i> est cochée</b> (décochée par défaut, réglage mémorisé) : sinon rien n'est teinté et le suivi ne coûte rien. <b>Instruction en cours (PC)</b> : toujours en <b>orange</b>, avec ou sans cette option : la ligne du désassemblage et du pseudocode, la ligne et le cadre du bloc dans le graphe, et la fonction en cours (orange et en gras) dans la liste des <b>Fonctions</b>. Sans l'option, c'est tout ce qui est surligné dans ces vues.</p>
 <p><b>Suivre l'exécution</b> : la case « Suivre l'exécution » du désassemblage, du pseudocode et du graphe centre la vue sur l'instruction en cours : si le PC sort de la fonction affichée, la vue passe à la fonction qui le contient, puis la ligne (ou le bloc) du PC est sélectionnée et amenée au milieu. La ligne du PC est mise à jour toute seule, sans avoir à survoler le graphe, y compris pendant que le CPU tourne.</p>
-<p><b>Tableaux et variables de plusieurs octets</b> : le fichier de labels peut contenir une section « sizes » (taille des tableaux et structures nommés). Une adresse située à l'intérieur d'un tableau s'affiche « Nom+offset » dans le désassemblage, le pseudocode et le graphe, et le survol montre le commentaire du tableau. L'en-tête peut aussi lister d'autres empreintes CRC32 (« also ») pour qu'un même fichier serve à plusieurs lectures du même logiciel. Les fichiers fournis dans data/labels ont été reconstruits depuis les bases IDA (noms de fonctions et de variables, commentaires) ; ce qui a été repris d'une autre version du logiciel est marqué « [port …] » et les commentaires générés automatiquement à partir des références « [auto …] ».</p>
+<p><b>Tableaux et variables de plusieurs octets</b> : le fichier de labels peut contenir une section « sizes » (taille des tableaux et structures nommés). Une adresse située à l'intérieur d'un tableau s'affiche « Nom+offset » dans le désassemblage, le pseudocode et le graphe, et le survol montre le commentaire du tableau. L'en-tête peut aussi lister d'autres empreintes CRC32 (« also ») pour qu'un même fichier serve à plusieurs lectures du même logiciel.</p>
 
 <h3 id="labels-edition">Renommer, commenter et enregistrer les labels</h3>
 <p>Dans le <b>désassemblage</b>, le <b>pseudocode</b> et le <b>graphe</b> (et dans les listes <i>Fonctions</i> et <i>Symboles</i>), un
@@ -863,12 +858,43 @@ symboles de l'instruction de la ligne : cible du saut ou de l'appel, variable lu
 choisies dès qu'on passe sur son onglet.</p>
 <p><b>Enregistrer</b> : <i>Fichier &gt; Enregistrer les labels</i> (ou <i>sous…</i>) écrit un fichier JSON avec les noms, les bornes des fonctions et les commentaires,
 précédé d'un <b>en-tête de version</b> :
-<code>"program": {"crc": "378F0883", "description": "programme 410G805004006"}</code>. Le <code>crc</code> est l'empreinte du programme chargé (voir plus haut) :
+<code>"program": {"crc": "12345678", "description": "mon logiciel"}</code>. Le <code>crc</code> est l'empreinte du programme chargé (voir plus haut) :
 tout fichier de <code>data/labels</code> qui porte cet en-tête est <b>rechargé automatiquement</b> pour ce logiciel. Le dossier est <b>scanné à l'ouverture</b> du simulateur
 et au chargement d'un full read : le journal liste les fichiers et leur version ; s'il y en a plusieurs pour un même logiciel, le plus récent est utilisé. Le fichier
 chargé est sauvegardé en <code>.bak</code> la première fois qu'on l'écrase ; en quittant (ou en chargeant un autre full read ou d'autres labels), le simulateur propose
-d'enregistrer les modifications. Un fichier de labels d'un autre logiciel est signalé avant d'être chargé. Les anciens fichiers (sans en-tête, avec <code>func_cmts</code> d'IDA
-ou simple texte <code>ADRESSE NOM</code>) restent lisibles ; <code>outils/labels_versions.sh</code> ajoute l'en-tête aux fichiers qu'il produit.</p>
+d'enregistrer les modifications. Un fichier de labels d'un autre logiciel est signalé avant d'être chargé. Les anciens fichiers (sans en-tête, avec <code>func_cmts</code>
+ou simple texte <code>ADRESSE NOM</code>) restent lisibles.</p>
+
+<h3 id="labels-format">Format d'un fichier de labels et création d'un label</h3>
+<p><b>Créer un label</b> : il n'y a pas de fichier à écrire à la main. Dans le <b>graphe</b> comme dans le <b>pseudocode</b> (et dans le désassemblage),
+un <b>clic droit</b> sur une adresse, une fonction <code>sub_xxxxx</code>, une étiquette <code>loc_xxxxx</code> ou une variable encore sans nom
+(affichée en hexadécimal) propose <i>Renommer…</i> : le nom saisi <b>crée</b> le label à cette adresse. <i>Commentaire…</i> crée de la même façon le commentaire
+de l'adresse. Quand le mot cliqué n'est pas un symbole, le menu liste ceux de l'instruction de la ligne (cible du saut ou de l'appel, variable lue ou
+écrite) : choisir celui à nommer. Puis <i>Fichier &gt; Enregistrer les labels</i> écrit le fichier décrit ci-dessous.</p>
+<p><b>Format</b> : un fichier JSON en UTF-8, un par version de logiciel, dans <code>data/labels</code> (nom libre, extension <code>.json</code> ;
+un fichier par logiciel). Toutes les adresses sont des <b>nombres décimaux</b> : l'adresse linéaire du processeur
+(<code>0x3F9C</code> s'écrit <code>16284</code>). Exemple réduit :</p>
+<pre>{
+  "format": "ms41sim-labels",
+  "version": 2,
+  "program": {"crc": "12345678", "description": "mon logiciel", "also": []},
+  "names":    [[560, "Reset_Handler"], [16284, "EngineSpeed_Rpm"]],
+  "funcs":    [[560, 814], [814, 1042]],
+  "comments": [[560, "Initialisation après le reset."], [16284, "Régime moteur, tr/min."]],
+  "sizes":    [[7477, 715]]
+}</pre>
+<table>
+  <tr><th>Clé</th><th>Contenu</th></tr>
+  <tr><td><code>format</code>, <code>version</code></td><td>Marqueur du format (<code>ms41sim-labels</code>, version 2).</td></tr>
+  <tr><td><code>program</code></td><td><code>crc</code> : empreinte CRC32 du programme (0x18000-0x3FFFF), en 8 chiffres hexa ; elle sert à choisir le bon fichier pour le full read chargé.
+      <code>description</code> : texte libre (référence du logiciel). <code>also</code> (facultatif) : autres empreintes du même programme.</td></tr>
+  <tr><td><code>names</code></td><td>Liste de paires <code>[adresse, "nom"]</code> : fonctions, variables, étiquettes. Nom : lettres, chiffres, <code>_ . $ ? @</code>, sans espace ; une adresse = un nom.</td></tr>
+  <tr><td><code>funcs</code></td><td>Liste de <code>[début, fin]</code>, <b>fin exclue</b> : bornes des fonctions (pour le graphe, le pseudocode et la liste des fonctions). Sans cette section, le début est deviné.</td></tr>
+  <tr><td><code>comments</code></td><td>Liste de paires <code>[adresse, "texte"]</code> : affichées au survol et dans la colonne <i>Commentaire</i> ; <code>\n</code> pour un saut de ligne.</td></tr>
+  <tr><td><code>sizes</code></td><td>Liste de <code>[adresse, taille en octets]</code> pour les tableaux et structures : une adresse à l'intérieur s'affiche <i>Nom+offset</i>.</td></tr>
+</table>
+<p>Seul <code>names</code> est indispensable ; les autres sections et l'en-tête <code>program</code> sont facultatifs (sans en-tête, le fichier ne se charge pas tout seul : <i>Fichier &gt; Charger des labels</i>).
+Les anciens formats (JSON avec <code>func_cmts</code>, ou texte <code>ADRESSE NOM</code>) restent lisibles.</p>
 
 <h3 id="accesbus">Accès bus</h3>
 <figure><img src="images/acces_bus.png" alt="Onglet Accès bus"></figure>
@@ -1236,7 +1262,7 @@ ouvrir la communication au ralenti (elle reste ensuite ouverte, jusqu'à 30 s sa
   <tr><td>Fenêtres</td><td>Un onglet par case dans sa propre fenêtre ; tout remettre dans la fenêtre principale ; oublier les positions.</td></tr>
   <tr><td>Settings</td><td>Mute (son du moteur coupé) ; volume du moteur ; échappement (origine, X-pipe + race, race) ; thème (sombre ou clair) ; <b>Surligné exploré</b> (teinte le code récemment exécuté, décoché par défaut) ; Manette… (pilotage du moteur virtuel à la manette).</td></tr>
   <tr><td>Mode Interface</td><td>Extra simple, simple, normal ou avancé : onglets et vues montrés (voir <a href="#modes">Modes d'interface</a>).</td></tr>
-  <tr><td>Aide</td><td>Ce guide (<kbd>F1</kbd>) ; À propos.</td></tr>
+  <tr><td>Aide</td><td>Ce guide (<kbd>F1</kbd>) ; Changelog (historique des versions, défilable) ; À propos.</td></tr>
 </table>
 
 <h2 id="limites">Limites actuelles</h2>
